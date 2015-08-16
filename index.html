@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="DOTACareer">
+    <head>
+        <link rel="stylesheet" type="text/css" href="static/assets/css/main.css">
+        <link rel="stylesheet" type="text/css" href="static/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="static/assets/css/bootstrap-theme.min.css">
+        <meta charset="utf-8">
+        <title>DOTA Career - GOGO</title>
+        <script src="static/assets/libs/angular.min.js"></script>
+        <script src="static/assets/libs/ui-bootstrap-tpls-0.13.3.min.js"></script>
+        <script src="static/app/app.js"></script>
+        <script src="static/app/playercontroller.js"></script>
+        <script src="static/app/teamcontroller.js"></script>
+    </head>
+    <body>
+        {% raw %}
+
+        <div data-ng-include data-src="'static/app/playerview.html'"></div>
+        <div data-ng-include data-src="'static/app/teamview.html'"></div>
+
+        {% endraw %}
+    </body>
+</html>

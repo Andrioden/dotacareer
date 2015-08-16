@@ -1,0 +1,16 @@
+<div id="playerView" ng-controller="PlayerController as playerController">
+
+    <div ng-show="player == null && !loading_player" ng-cloak>
+        <h1>Register player</h1>
+        <form id="registerPlayerForm" name="registerPlayerForm" ng-submit="submitPlayer()">
+            <input type="text" required="true" minlength="1" ng-model="register_nick" placeholder="Nickname" auto-focus/>
+            <button type="submit" form="registerPlayerForm" value="Submit">Register!</button>
+        </form>
+    </div>
+
+    <div ng-show="player != null && !loading_player" ng-cloak>
+        <h1>Player: {{player.nick}}</h1>
+        <div>Skill: {{player.skill}}</div>
+    </div>
+
+</div>

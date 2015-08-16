@@ -1,0 +1,9 @@
+/* Part of installing the bootstrap lookalike components for AngularJS. https://angular-ui.github.io/bootstrap/ */
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+
+#playerView, #teamView {
+    margin: 10px;
+    padding: 2px;
+    border: solid black 1px;
+}
