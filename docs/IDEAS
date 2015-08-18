@@ -1,0 +1,7 @@
+- Investigate p2p websocket
+- PLayers can join solo ranked
+- Players can join solo unranked
+- Players can watch twitch
+- Match results contain: Chat (4lols), event log, player feedback.
+- Model in player chemestri
+- Players have hero skill levels, which may increase when playing as, with or against hero. But can also be reduced over time.

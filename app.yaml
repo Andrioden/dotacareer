@@ -18,6 +18,9 @@ handlers:
 - url: /api/teams/.*
   script: api.teams.app
 
+- url: /api/matches/.*
+  script: api.matches.app
+
 - url: .*
   script: main.app
 

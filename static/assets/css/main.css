@@ -2,7 +2,7 @@
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
 
-#playerView, #teamView {
+.view {
     margin: 10px;
     padding: 2px;
     border: solid black 1px;

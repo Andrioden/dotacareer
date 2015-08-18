@@ -2,7 +2,6 @@ import json
 from google.appengine.api import users
 from models import Player
 
-
 def error_400(response, code, message):
     response.headers['Content-Type'] = 'application/json'
     response.set_status(400)
@@ -30,6 +29,16 @@ def validate_request_data(response, request_data, list_of_dict_keys):
             error_400(response, "VALIDATION_ERROR_MISSING_DATA", "The request data is missing the input value '%s'" % key)
             return False
     return True
+
+
+def set_json_response(response, data):
+    response.headers['Content-Type'] = 'application/json'
+    response.out.write(json.dumps(data))
+
+
+def current_user_player():
+    user = users.get_current_user()
+    return Player.query(Player.userid == user.user_id()).get()
 #
 #
 # def forbidden_403(response, code, message):

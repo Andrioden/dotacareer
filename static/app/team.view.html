@@ -1,4 +1,4 @@
-<div ng-show="player != null" id="teamView" ng-controller="TeamController as teamController">
+<div ng-show="player != null" id="teamView" class="view" ng-controller="TeamController as teamController">
 
     <div ng-show="player.team == null">
         <h1>Create or join a team</h1>
@@ -67,7 +67,7 @@
         <input type="text" ng-model="application_text" placeholder="Application text" class="form-control">
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="button" ng-click="ok()">Apply</button>
-        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        <button type="button" ng-click="ok()" class="btn btn-primary" >Apply</button>
+        <button type="button" ng-click="cancel()" class="btn btn-warning">Cancel</button>
     </div>
 </script>

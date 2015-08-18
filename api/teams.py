@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
 import webapp2
-import json
 import logging
-from utils import error_400, validate_request_data, validate_logged_inn
+from utils import *
 from models import Player, Team, TeamApplication
-from google.appengine.api import users
 from google.appengine.ext import ndb
 
 
@@ -13,7 +11,7 @@ class RegisterHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player = _current_user_player()
+        player = current_user_player()
 
         # VALIDATION
         if not validate_request_data(self.response, request_data, ['team_name']):
@@ -33,25 +31,19 @@ class RegisterHandler(webapp2.RequestHandler):
         player.team = new_team.key
         player.put()
 
-        return_data = {'team': new_team.get_data(), 'player': player.get_data()}
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(return_data))
-
-
+        set_json_response(self.response, {'team': new_team.get_data(), 'player': player.get_data()})
 
 
 class AllHandler(webapp2.RequestHandler):
     def get(self):
-        all_teams_data = [team.get_data() for team in Team.query().fetch()]
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(all_teams_data))
+        set_json_response(self.response, [team.get_data() for team in Team.query().fetch()])
 
 
 class ApplyHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player =  _current_user_player()
+        player =  current_user_player()
 
         # VALIDATIONS
         if not validate_request_data(self.response, request_data, ['team_id']):
@@ -67,15 +59,14 @@ class ApplyHandler(webapp2.RequestHandler):
             text=request_data['text']
         ).put()
 
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps({'code': "OK"}))
+        set_json_response(self.response, {'code': "OK"})
 
 
 class AcceptApplicationHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player = _current_user_player()
+        player = current_user_player()
         application = TeamApplication.get_by_id(int(request_data['application_id']))
         application_to_team = application.team.get()
 
@@ -89,15 +80,14 @@ class AcceptApplicationHandler(webapp2.RequestHandler):
         applicant.put()
         application.key.delete()
 
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps({'code': "OK"}))
+        set_json_response(self.response, {'code': "OK"})
 
 
 class DeclineApplicationHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player = _current_user_player()
+        player = current_user_player()
         application = TeamApplication.get_by_id(int(request_data['application_id']))
         application_to_team = application.team.get()
 
@@ -108,15 +98,14 @@ class DeclineApplicationHandler(webapp2.RequestHandler):
         # DO SHIT
         application.key.delete()
 
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps({'code': "OK"}))
+        set_json_response(self.response, {'code': "OK"})
 
 
 class KickMemberHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player = _current_user_player()
+        player = current_user_player()
         kicked_player = Player.get_by_id(int(request_data['player_id']))
         kicked_player_team = kicked_player.team.get()
 
@@ -131,13 +120,10 @@ class KickMemberHandler(webapp2.RequestHandler):
         kicked_player.team = None
         kicked_player.put()
 
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps({'code': "OK"}))
+        set_json_response(self.response, {'code': "OK"})
 
 
-def _current_user_player():
-    user = users.get_current_user()
-    return Player.query(Player.userid == user.user_id()).get()
+
 
 
 def _validate_has_no_team(response, player):

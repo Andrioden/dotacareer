@@ -3,12 +3,12 @@
 import webapp2
 import json
 import logging
-from utils import error_400, validate_logged_inn, validate_request_data
+from utils import *
 from models import Player
 from google.appengine.api import users
 
 
-class Register(webapp2.RequestHandler):
+class RegisterHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
@@ -26,11 +26,10 @@ class Register(webapp2.RequestHandler):
         new_player = Player(
             userid=user.user_id(),
             nick=request_data['nick'],
-            skill=10
+            skill=10000
         ).put().get()
 
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(new_player.get_data()))
+        set_json_response(self.response, new_player.get_data())
 
     def _validate_has_not_player_already(self, user):
         if Player.query(Player.userid == user.user_id()).count() > 0:
@@ -40,7 +39,7 @@ class Register(webapp2.RequestHandler):
             return True
 
 
-class My(webapp2.RequestHandler):
+class MyHandler(webapp2.RequestHandler):
     def get(self):
         # VALIDATION
         if not validate_logged_inn(self.response):
@@ -50,13 +49,24 @@ class My(webapp2.RequestHandler):
         user = users.get_current_user()
         player = Player.query(Player.userid == user.user_id()).get()
 
-        self.response.headers['Content-Type'] = 'application/json'
         if player:
-            self.response.out.write(json.dumps({'has_player': True, 'player': player.get_data('full')}))
+            set_json_response(self.response, {'has_player': True, 'player': player.get_data('full')})
         else:
-            self.response.out.write(json.dumps({'has_player': False}))
+            set_json_response(self.response, {'has_player': False})
+
+
+class StopDoingHandler(webapp2.RequestHandler):
+    def post(self):
+        player = current_user_player()
+        player.doing.delete()
+        player.doing = None
+        player.put()
+
+        set_json_response(self.response, {'code': "OK"})
+
 
 app = webapp2.WSGIApplication([
-    (r'/api/players/register', Register),
-    (r'/api/players/my', My),
+    (r'/api/players/register', RegisterHandler),
+    (r'/api/players/my', MyHandler),
+    (r'/api/players/stopDoing', StopDoingHandler),
 ], debug=True)
