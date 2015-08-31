@@ -2,8 +2,12 @@
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
 
-.view {
-    margin: 10px;
+.row.view {
+    margin: 5px;
     padding: 2px;
     border: solid black 1px;
+}
+
+.btn-toolbar.margin-bottom {
+    margin-bottom: 5px;
 }

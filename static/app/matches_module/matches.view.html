@@ -1,0 +1,42 @@
+<div id="matchesView" class="row view" ng-controller="MatchesController as matchesController">
+    <div class="col-xs-12 col-sm-6 col-md-5">
+        <h1>Matches</h1>
+
+        <div ng-show="player.matches.length == 0">- No Matches</div>
+        <table class="table" ng-show="player.matches.length > 0">
+            <tbody>
+            <tr ng-repeat="match in player.matches">
+                <td>Match id: {{match.id}}</td>
+                <td>{{match.winning_faction}} won</td>
+                <td>
+                    <div class="btn-toolbar pull-right">
+                        <button ng-click="openMatchDialog(match)" class="btn btn-primary">Load details</button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script type="text/ng-template" id="matchDialogContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Match</h3>
+    </div>
+    <div class="modal-body" ng-show="match != null">
+        <div>{{match.winning_faction}} won!</div>
+        <br/>
+        <table class="table">
+            <tbody>
+            <tr ng-repeat="combatant in match.combatants | orderBy:['faction']">
+                <td>{{combatant.nick}}</td>
+                <td>{{combatant.faction}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
+    </div>
+</script>
