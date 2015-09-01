@@ -3,11 +3,33 @@
 
 
 .row.view {
-    margin: 5px;
+    margin: 10px 5px;
     padding: 2px;
-    border: solid black 1px;
+    background: #1e1e1e;
 }
 
 .btn-toolbar.margin-bottom {
     margin-bottom: 5px;
+}
+
+body
+{
+    background: black !important;
+    color: #7d7d7d !important;
+}
+
+h1
+{
+    color: #c33d2b !important;
+}
+
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th
+{
+    line-height: 2.45;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th
+{
+    border-bottom: 1px solid black;
 }
