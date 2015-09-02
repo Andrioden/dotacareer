@@ -2,7 +2,8 @@ from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 from random import shuffle, randint
 import logging
-
+from google.appengine.api import channel
+import json
 
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
@@ -34,6 +35,9 @@ class Player(ndb.Model):
         self.doing.delete()
         self.doing = None
         self.put()
+
+    def websocket_notify(self, type, value):
+        channel.send_message(self.userid, json.dumps({'type': type, 'value': value}))
 
 
 class Team(ndb.Model):
@@ -79,6 +83,11 @@ class MatchSoloQueue(ndb.Model):
             'what': '%sMatchSoloQueue' % self.type,
             'queued': MatchSoloQueue.query(MatchSoloQueue.type == self.type).count()
         }
+
+    # @classmethod
+    # def _pre_delete_hook(cls, key):
+    #     match_queues_left = MatchSoloQueue.query(MatchSoloQueue.type == key.get().type)
+    #     cls.player.get().websocket_notify("NewPlayerDoingQueueCount", match_queues_left)
 
 
 class Match(ndb.Model):

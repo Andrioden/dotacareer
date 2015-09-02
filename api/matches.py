@@ -36,6 +36,7 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
         if match:
             set_json_response(self.response, {'doing': None, 'match': match.get_data("full")})
         else:
+            self._notify_players_new_queue_size(match_queue.type)
             set_json_response(self.response, {'doing': match_queue.get_data()})
 
     def _trigger_player_match(self, match_queue):
@@ -48,6 +49,12 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
             return match
         else:
             return None
+
+    def _notify_players_new_queue_size(self, match_queue_type):
+        all_match_queues = MatchSoloQueue.query(MatchSoloQueue.type == match_queue_type)
+        all_match_queues_count = all_match_queues.count()
+        for match_queue in all_match_queues:
+            match_queue.player.get().websocket_notify("NewPlayerDoingQueueCount", all_match_queues_count)
 
 
 class PlayAgainstBotsHandler(webapp2.RequestHandler):

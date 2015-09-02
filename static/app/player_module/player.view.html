@@ -19,7 +19,6 @@
             <div>Doing: <span ng-show="player.doing == null">nothing</span>{{player.doing.what}} <span ng-show="player.doing.queued">({{player.doing.queued}} queued)</span></div>
 
             <div class="btn-toolbar margin-bottom">
-
                 <button ng-show="player.doing == null" ng-click="playAgainstBots()" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Play against bots</button>
                 <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Unranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join unranked solo queue</button>
                 <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Ranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join ranked solo queue</button>
