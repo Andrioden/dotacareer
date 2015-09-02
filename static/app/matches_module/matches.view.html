@@ -15,8 +15,8 @@
         <table class="table" ng-show="player.matches.length > 0">
             <tbody>
             <tr ng-repeat="match in player.matches">
-                <td>Match id: {{match.id}}</td>
-                <td>{{match.winning_faction}} won</td>
+                <td class="col-sm-4">Match id: {{match.id}}</td>
+                <td class="col-sm-2">{{match.winning_faction}} won</td>
                 <td>
                     <div class="btn-toolbar pull-right">
                         <button ng-click="openMatchDialog(match)" class="btn btn-primary">Load details</button>
