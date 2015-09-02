@@ -4,7 +4,8 @@
 .row.view {
     margin: 10px 5px;
     padding: 2px;
-    background: #272727;
+    background-color: #272727;
+    background-image: url("../images/view_bg_texture.png");
 }
 
 .btn-toolbar.margin-bottom {
@@ -22,8 +23,8 @@ h1 {
 
 .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
     line-height: 2.45;
-    border-bottom: 1px solid #212121;
-    border-top: 1px solid #212121;
+    border-bottom: 1px solid #161616;
+    border-top: 1px solid #161616;
 }
 
 .modal-header {
@@ -32,6 +33,7 @@ h1 {
 
 .modal-content {
      background: #272727;
+     background-image: url("../images/view_bg_texture.png");
 }
 
 .modal-footer {
