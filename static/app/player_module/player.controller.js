@@ -29,41 +29,50 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal){
             });
     };
 
-    $scope.isJoiningOrBotting = false;
+    $scope.isDoingRelatedAjaxRunning = false;
 
     $scope.playAgainstBots = function() {
-        $scope.isJoiningOrBotting = true;
+        $scope.isDoingRelatedAjaxRunning = true;
         $http.post('/api/matches/playAgainstBots').
             then(function(response) {
-                //$rootScope.player.doing = response.data;
-                $rootScope.player.matches.push(response.data.match);
-                $rootScope.$broadcast('MatchesControllerEvent_OpenMatchDialog', response.data.match);
-                $scope.isJoiningOrBotting = false;
+                matchWasPlayed(response.data.match);
+                $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
                 AlertError(response);
-                $scope.isJoiningOrBotting = false;
+                $scope.isDoingRelatedAjaxRunning = false;
             });
     }
 
     $scope.joinSoloMatchQueue = function(type) {
-        $scope.isJoiningOrBotting = true;
+        $scope.isDoingRelatedAjaxRunning = true;
         $http.post('/api/matches/joinSoloQueue', {type: type}).
             then(function(response) {
-                $rootScope.player.doing = response.data;
-                $scope.isJoiningOrBotting = false;
+                $rootScope.player.doing = response.data.doing;
+                if (response.data.match) matchWasPlayed(response.data.match);
+                $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
                 AlertError(response);
-                $scope.isJoiningOrBotting = false;
+                $scope.isDoingRelatedAjaxRunning = false;
             });
     }
 
     $scope.stopDoing = function() {
+        $scope.isDoingRelatedAjaxRunning = true;
         $http.post('/api/players/stopDoing').
             then(function(response) {
                 $rootScope.player.doing = null;
+                $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
                 AlertError(response);
+                $scope.isDoingRelatedAjaxRunning = false;
             });
+    }
+
+    // Private functions
+
+    function matchWasPlayed(match) {
+        $rootScope.player.matches.push(match);
+        $rootScope.$broadcast('MatchesControllerEvent_OpenMatchDialog', match);
     }
 
 });

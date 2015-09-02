@@ -30,6 +30,11 @@ class Player(ndb.Model):
             'matches': matches_data
         }
 
+    def clear_doing(self):
+        self.doing.delete()
+        self.doing = None
+        self.put()
+
 
 class Team(ndb.Model):
     name = ndb.StringProperty(required=True)
@@ -71,12 +76,27 @@ class MatchSoloQueue(ndb.Model):
         return {
             'id': self.key.id(),
             'type': self.type,
-            'what': '%sMatchSoloQueue' % self.type
+            'what': '%sMatchSoloQueue' % self.type,
+            'queued': MatchSoloQueue.query(MatchSoloQueue.type == self.type).count()
         }
 
 
 class Match(ndb.Model):
     winning_faction = ndb.StringProperty(required=True, choices=['Dire', 'Radiant'])
+    type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked'])
+
+    def play_match(self, players):
+        shuffle(players)
+        alternated_faction_list = ['Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant']
+        self.cached_combatants = []
+        for player in players:
+            self.cached_combatants.append(MatchPlayer(
+                player=player.key,
+                faction=alternated_faction_list.pop(0)
+            ))
+
+        self._simulate_match()
+        self._save_data()
 
     def play_bot_match(self, player):
         # Add player as combatant
@@ -94,19 +114,15 @@ class Match(ndb.Model):
                 faction=faction
             ))
 
-        # Play match
-        self.winning_faction = 'Dire' if randint(0,1) == 0 else 'Radiant'
+        self._simulate_match()
+        self._save_data()
 
-        # Save match
-        self.put()
-        for combatant in self.cached_combatants:
-            combatant.match = self.key
-            combatant.put()
 
     def get_data(self, detail_level="simple"):
         data = {
             'id': self.key.id(),
-            'winning_faction': self.winning_faction
+            'winning_faction': self.winning_faction,
+            'type': self.type
         }
 
         if detail_level == "full":
@@ -120,6 +136,14 @@ class Match(ndb.Model):
 
         return data
 
+    def _simulate_match(self):
+        self.winning_faction = 'Dire' if randint(0,1) == 0 else 'Radiant'
+
+    def _save_data(self):
+        self.put()
+        for combatant in self.cached_combatants:
+            combatant.match = self.key
+            combatant.put()
 
     def _get_shuffled_factions_spots(self):
         faction_spots = ['Dire', 'Dire', 'Dire', 'Dire', 'Dire', 'Radiant', 'Radiant', 'Radiant', 'Radiant', 'Radiant']

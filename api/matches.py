@@ -5,6 +5,7 @@ import logging
 from utils import *
 from google.appengine.api import users
 from models import MatchSoloQueue, Match
+from google.appengine.ext import ndb
 
 
 class JoinSoloQueueHandler(webapp2.RequestHandler):
@@ -20,22 +21,44 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
             error_400(self.response, "ERROR_PLAYER_BUSY", "Player is busy.")
             return
 
-        match_queue = MatchSoloQueue(
+        # JOIN QUEUE
+        match_queue_key = MatchSoloQueue(
             player=player.key,
             type=request_data['type']
         ).put()
 
-        player.doing = match_queue
+        player.doing = match_queue_key
         player.put()
 
-        set_json_response(self.response, player.doing.get().get_data())
+        ndb.get_context().clear_cache() # If it isnt cleared the following count of queued players wont count this
+        match_queue = match_queue_key.get()
+        match = self._trigger_player_match(match_queue)
+        if match:
+            set_json_response(self.response, {'doing': None, 'match': match.get_data("full")})
+        else:
+            set_json_response(self.response, {'doing': match_queue.get_data()})
+
+    def _trigger_player_match(self, match_queue):
+        if MatchSoloQueue.query(MatchSoloQueue.type == match_queue.type).count() >= 2:
+            match_players = [match_queue.player.get() for match_queue in MatchSoloQueue.query(MatchSoloQueue.type == match_queue.type).fetch(10)]
+            match = Match(type=match_queue.type)
+            match.play_match(match_players)
+            for player in match_players:
+                player.clear_doing()
+            return match
+        else:
+            return None
 
 
 class PlayAgainstBotsHandler(webapp2.RequestHandler):
     def post(self):
         player = current_user_player()
 
-        bot_match = Match()
+        if player.doing:
+            error_400(self.response, "ERROR_PLAYER_BUSY", "Player is busy.")
+            return
+
+        bot_match = Match(type="Bot")
         bot_match.play_bot_match(player)
 
         return set_json_response(self.response, {'match': bot_match.get_data("full")})
@@ -45,6 +68,10 @@ class RESTHandler(webapp2.RequestHandler):
     def get(self, match_id):
         match = Match.get_by_id(int(match_id))
         set_json_response(self.response, match.get_data('full'))
+
+
+
+
 
 app = webapp2.WSGIApplication([
     (r'/api/matches/playAgainstBots', PlayAgainstBotsHandler),

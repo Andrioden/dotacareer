@@ -58,9 +58,7 @@ class MyHandler(webapp2.RequestHandler):
 class StopDoingHandler(webapp2.RequestHandler):
     def post(self):
         player = current_user_player()
-        player.doing.delete()
-        player.doing = None
-        player.put()
+        player.clear_doing()
 
         set_json_response(self.response, {'code': "OK"})
 
