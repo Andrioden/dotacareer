@@ -1,4 +1,4 @@
-app.controller('MatchesController', function($rootScope, $scope, $modal){
+app.controller('MatchesController', function($rootScope, $scope, $modal, WebSocketService){
 
     // EXPOSED ACTIONS FOR HTML
     $scope.openMatchDialog = function (match) {
@@ -15,6 +15,11 @@ app.controller('MatchesController', function($rootScope, $scope, $modal){
     // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
     $scope.$on('MatchesControllerEvent_OpenMatchDialog', function(event, match) {
         $scope.openMatchDialog(match);
+    });
+
+    WebSocketService.subscribe("MatchCompleted", function(match){
+        $rootScope.player.matches.push(match);
+        $rootScope.$apply();
     });
 
 });

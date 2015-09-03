@@ -5,6 +5,7 @@ from gameconfig import EnergyConfig
 import logging
 from google.appengine.api import channel
 import json
+from datetime import datetime
 
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
@@ -38,6 +39,7 @@ class Player(ndb.Model):
         self.doing.delete()
         self.doing = None
         self.put()
+
 
     def websocket_notify(self, type, value):
         channel.send_message(self.userid, json.dumps({'type': type, 'value': value}))
@@ -87,15 +89,18 @@ class MatchSoloQueue(ndb.Model):
             'queued': MatchSoloQueue.query(MatchSoloQueue.type == self.type).count()
         }
 
-    # @classmethod
-    # def _pre_delete_hook(cls, key):
-    #     match_queues_left = MatchSoloQueue.query(MatchSoloQueue.type == key.get().type)
-    #     cls.player.get().websocket_notify("NewPlayerDoingQueueCount", match_queues_left)
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        match_queues = MatchSoloQueue.query(MatchSoloQueue.type == key.get().type)
+        match_queues_after_deletion_count = match_queues.count() - 1
+        for match_queue_left in match_queues:
+            match_queue_left.player.get().websocket_notify("NewPlayerDoingQueueCount", match_queues_after_deletion_count)
 
 
 class Match(ndb.Model):
     winning_faction = ndb.StringProperty(required=True, choices=['Dire', 'Radiant'])
     type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked'])
+    date = ndb.DateTimeProperty(auto_now_add=True)
 
     def play_match(self, players):
         shuffle(players)
@@ -138,7 +143,9 @@ class Match(ndb.Model):
         data = {
             'id': self.key.id(),
             'winning_faction': self.winning_faction,
-            'type': self.type
+            'type': self.type,
+            'date': self.date.strftime("%Y-%m-%d, %H:%M"),
+            'date_epoch': int((self.date - datetime(1970,1,1)).total_seconds()),
         }
 
         if detail_level == "full":

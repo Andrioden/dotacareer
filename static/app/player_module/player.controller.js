@@ -2,10 +2,13 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
     // IMPORTANT SCOPE VARIABLES
     $rootScope.player = undefined;
 
-    WebSocketService.subscribe("NewPlayerDoingQueueCount", function(websocketMessageValue){
-        console.log("I heard your message")
-        console.log(websocketMessageValue)
-        $rootScope.player.doing.queued = websocketMessageValue;
+    WebSocketService.subscribe("NewPlayerDoingQueueCount", function(newMatchQueueCount){
+        if ($rootScope.player.doing) $rootScope.player.doing.queued = newMatchQueueCount;
+        $rootScope.$apply();
+    });
+
+    WebSocketService.subscribe("MatchCompleted", function(match){
+        $rootScope.player.doing = null;
         $rootScope.$apply();
     });
 

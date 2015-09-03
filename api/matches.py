@@ -32,20 +32,22 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
 
         ndb.get_context().clear_cache() # If it isnt cleared the following count of queued players wont count this
         match_queue = match_queue_key.get()
-        match = self._trigger_player_match(match_queue)
+        match = self._trigger_played_match(match_queue, player)
         if match:
             set_json_response(self.response, {'doing': None, 'match': match.get_data("full")})
         else:
             self._notify_players_new_queue_size(match_queue.type)
             set_json_response(self.response, {'doing': match_queue.get_data()})
 
-    def _trigger_player_match(self, match_queue):
+    def _trigger_played_match(self, match_queue, request_player):
         if MatchSoloQueue.query(MatchSoloQueue.type == match_queue.type).count() >= 2:
             match_players = [match_queue.player.get() for match_queue in MatchSoloQueue.query(MatchSoloQueue.type == match_queue.type).fetch(10)]
             match = Match(type=match_queue.type)
             match.play_match(match_players)
             for player in match_players:
                 player.clear_doing()
+                if not player.key == request_player.key:
+                    player.websocket_notify("MatchCompleted", match.get_data())
             return match
         else:
             return None
@@ -75,9 +77,6 @@ class RESTHandler(webapp2.RequestHandler):
     def get(self, match_id):
         match = Match.get_by_id(int(match_id))
         set_json_response(self.response, match.get_data('full'))
-
-
-
 
 
 app = webapp2.WSGIApplication([

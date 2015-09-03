@@ -1,5 +1,4 @@
 app.factory('WebSocketService', function(){
-    console.log("Inititating WebSocketService")
     var subscribers = [];
 
     var channel = new goog.appengine.Channel(websocket_channel_token);
@@ -21,7 +20,6 @@ app.factory('WebSocketService', function(){
     return {
         subscribe: function(type, callback) {
             subscribers.push({type: type, callback: callback});
-            console.log("Lol subsribcs")
         }
     }
 });

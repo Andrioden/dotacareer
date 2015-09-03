@@ -3,10 +3,10 @@
         <h1>Matches</h1>
     </div>
 
-    <div class="col-xs-12 col-sm-6 col-md-5">
-        <h3 class="sub-header">Upcoming</h3>
-        <p>No upcoming matches</p>
-    </div>
+    <!--<div class="col-xs-12 col-sm-6 col-md-5">-->
+        <!--<h3 class="sub-header">Upcoming</h3>-->
+        <!--<p>No upcoming matches</p>-->
+    <!--</div>-->
 
     <div class="col-xs-12 col-sm-6 col-md-5">
         <h3 class="sub-header">History</h3>
@@ -14,10 +14,11 @@
         <div ng-show="player.matches.length == 0">- No Matches</div>
         <table class="table" ng-show="player.matches.length > 0">
             <tbody>
-            <tr ng-repeat="match in player.matches">
+            <tr ng-repeat="match in player.matches | orderBy:'-date_epoch'">
                 <td class="col-sm-4">{{match.id}}</td>
-                <td class="col-sm-4">{{match.type}}</td>
-                <td class="col-sm-2">{{match.winning_faction}} won</td>
+                <td class="col-sm-3">{{match.date}}</td>
+                <td class="col-sm-2">{{match.type}}</td>
+                <td class="col-sm-4">{{match.winning_faction}} won</td>
                 <td>
                     <div class="btn-toolbar pull-right">
                         <button ng-click="openMatchDialog(match)" class="btn btn-primary">Load details</button>
