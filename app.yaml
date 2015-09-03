@@ -21,7 +21,7 @@ handlers:
 - url: /api/matches/.*
   script: api.matches.app
 
-- url: /tasks/.*
+- url: /cron/.*
   script: cron.app
   login: admin
 
