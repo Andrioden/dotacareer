@@ -8,8 +8,9 @@
     background-image: url("../images/view_bg_texture.png");
 }
 
-.btn-toolbar.margin-bottom {
-    margin-bottom: 5px;
+.btn-toolbar.margin-vertical {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 body {

@@ -1,0 +1,4 @@
+cron:
+- description: Job that increases energy for all players with reduced energy
+  url: /tasks/energytick
+  schedule: every 1 mins

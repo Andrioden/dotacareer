@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 from random import shuffle, randint
+from gameconfig import EnergyConfig
 import logging
 
 
@@ -10,6 +11,7 @@ class Player(ndb.Model):
     skill = ndb.IntegerProperty(required=True)
     team = ndb.KeyProperty(kind='Team')
     doing = ndb.KeyProperty(default=None)
+    energy = ndb.IntegerProperty(default=EnergyConfig.maxEnergy)
 
     def get_data_nick_and_id(self):
         return {
@@ -27,6 +29,7 @@ class Player(ndb.Model):
             'skill': int(self.skill / 1000.0),
             'team': self.team.get().get_data(detail_level) if self.team else None,
             'doing': self.doing.get().get_data() if self.doing else None,
+            'energy': self.energy,
             'matches': matches_data
         }
 
@@ -116,6 +119,10 @@ class Match(ndb.Model):
 
         self._simulate_match()
         self._save_data()
+
+        # TODO: How do we handle energy cost of various actions? Like this?
+        player.energy -= 10
+        player.put()
 
 
     def get_data(self, detail_level="simple"):

@@ -21,6 +21,10 @@ handlers:
 - url: /api/matches/.*
   script: api.matches.app
 
+- url: /tasks/.*
+  script: cron.app
+  login: admin
+
 - url: .*
   script: main.app
 

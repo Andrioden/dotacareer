@@ -1,22 +1,17 @@
 <div ng-show="player != null" id="teamView" class="row view" ng-controller="TeamController as teamController">
 
     <div class="col-xs-12 col-sm-6 col-md-5">
+
         <div ng-show="player.team == null">
             <h1>Create or join a team</h1>
-            <button ng-show="player.team == null" ng-click="openCreateTeamDialog()" class="btn btn-default">Create a
-                team
-            </button>
-            <button ng-show="player.team == null" ng-click="openApplyTeamDialog()" class="btn btn-default">Apply to join
-                a team
-            </button>
+            <button ng-show="player.team == null" ng-click="openCreateTeamDialog()" class="btn btn-default">Create a team</button>
+            <button ng-show="player.team == null" ng-click="openApplyTeamDialog()" class="btn btn-default">Apply to join a team</button>
         </div>
 
         <div ng-show="player.team != null">
             <h1>{{player.team.name}}</h1>
 
-            <div ng-show="player.team.applications.length == 0">
-                No applications
-            </div>
+            <div ng-show="player.team.applications.length == 0">No applications</div>
 
             <div ng-show="player.team.applications.length > 0">
                 <h3 class="sub-header">Applications:</h3>
@@ -27,12 +22,8 @@
                         <td>{{application.text}}</td>
                         <td>
                             <div class="btn-toolbar pull-right">
-                                <button ng-show="player.id == player.team.owner.id"
-                                        ng-click="acceptApplication(application)" class="btn btn-primary">Accept
-                                </button>
-                                <button ng-show="player.id == player.team.owner.id"
-                                        ng-click="declineApplication(application)" class="btn btn-warning">Decline
-                                </button>
+                                <button ng-show="player.id == player.team.owner.id" ng-click="acceptApplication(application)" class="btn btn-primary">Accept</button>
+                                <button ng-show="player.id == player.team.owner.id" ng-click="declineApplication(application)" class="btn btn-warning">Decline</button>
                             </div>
                         </td>
                     </tr>
@@ -45,21 +36,17 @@
                 <table class="table">
                     <tbody>
                     <tr ng-repeat="member in player.team.members">
-                        <td>{{member.nick}} <span ng-show="member.id == player.team.owner.id">(owner)</span></td>
+                        <td>{{member.nick}}<span ng-show="member.id == player.team.owner.id"> (owner)</span></td>
 
                         <td>
                             <div class="btn-toolbar pull-right">
-                                <button ng-click="kickMember(member)" class="btn btn-warning"
-                                        ng-show="player.id == player.team.owner.id && member.id != player.team.owner.id">
-                                    Kick
-                                </button>
+                                <button ng-click="kickMember(member)" class="btn btn-warning" ng-show="player.id == player.team.owner.id && member.id != player.team.owner.id">Kick</button>
                             </div>
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-
 
         </div>
     </div>
