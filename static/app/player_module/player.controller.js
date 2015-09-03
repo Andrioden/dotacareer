@@ -1,6 +1,13 @@
-app.controller('PlayerController', function($rootScope, $scope, $http, $modal){
+app.controller('PlayerController', function($rootScope, $scope, $http, $modal, WebSocketService){
     // IMPORTANT SCOPE VARIABLES
     $rootScope.player = undefined;
+
+    WebSocketService.subscribe("NewPlayerDoingQueueCount", function(websocketMessageValue){
+        console.log("I heard your message")
+        console.log(websocketMessageValue)
+        $rootScope.player.doing.queued = websocketMessageValue;
+        $rootScope.$apply();
+    });
 
     // LOAD CURRENT PLAYER IF POSSIBLE
     $rootScope.player = null;
@@ -68,7 +75,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal){
             });
     }
 
-    // Private functions
+    // PRIVATE FUNCTIONS
 
     function matchWasPlayed(match) {
         $rootScope.player.matches.push(match);

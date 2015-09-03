@@ -19,10 +19,19 @@
     <script src="static/app/player_module/player.controller.js"></script>
     <script src="static/app/team_module/team.controller.js"></script>
     <script src="static/app/matches_module/matches.controller.js"></script>
+
+
 </head>
 <body>
-{% raw %}
-<div class="container-fluid" ng-view></div>
-{% endraw %}
+    {% raw %}
+    <div class="container-fluid" ng-view></div>
+    {% endraw %}
+
+    <!--  WebSocket channel - At the bottom since it does not need to be loaded for the page to function -->
+    <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+    <script>
+        websocket_channel_token = '{{ channel_token }}';
+    </script>
+    <script type="text/javascript" src="static/app/websocket_channel.js"></script>
 </body>
 </html>
