@@ -134,10 +134,6 @@ class Match(ndb.Model):
         self._simulate_match()
         self._save_data()
 
-        # TODO: How do we handle energy cost of various actions? Like this?
-        player.energy -= 10
-        player.put()
-
 
     def get_data(self, detail_level="simple"):
         data = {
