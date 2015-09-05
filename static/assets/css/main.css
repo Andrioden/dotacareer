@@ -14,16 +14,16 @@
 }
 
 body {
-    background: black !important;
-    color: #7d7d7d !important;
+    background: black;
+    color: #7d7d7d;
 }
 
 h1 {
-    color: #c33d2b !important;
+    color: #c33d2b;
 }
 
 .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-    line-height: 2.45;
+    line-height: 1.6;
     border-bottom: 1px solid #161616;
     border-top: 1px solid #161616;
 }
@@ -42,5 +42,9 @@ h1 {
 }
 
 .modal-title {
-   color: #c33d2b !important;
+   color: #c33d2b;
+}
+
+.table>tbody>tr>td>div>button{
+    line-height: .6;
 }
