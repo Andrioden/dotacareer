@@ -4,7 +4,7 @@ import webapp2
 import json
 import logging
 from utils import *
-from models import Player
+from models import Player, PlayerConfig
 from google.appengine.api import users
 
 
@@ -63,8 +63,56 @@ class StopDoingHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
+class NewConfigHandler(webapp2.RequestHandler):
+    def post(self):
+        player = current_user_player()
+        new_config = PlayerConfig(player=player.key).put().get()
+        set_json_response(self.response, new_config.get_data())
+
+
+class UpdateConfigHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        logging.info(request_data)
+        player = current_user_player()
+        config = PlayerConfig.get_by_id(int(request_data['id']))
+
+        # VALIDATION
+        if not config.player == player.key:
+            error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant update another players config. You api-hacking or what?")
+            return
+        if not validate_request_data(self.response, request_data, ['name']):
+            return
+
+        # UPDATE
+        config.name = request_data['name']
+        config.put()
+
+        set_json_response(self.response, {'code': "OK"})
+
+
+class DeleteConfigHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        logging.info(request_data)
+        player = current_user_player()
+        config = PlayerConfig.get_by_id(int(request_data['id']))
+
+        # VALIDATION
+        if not config.player == player.key:
+            error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant delete another players config. You api-hacking or what?")
+            return
+
+        # DELETE
+        config.key.delete()
+
+        set_json_response(self.response, {'code': "OK"})
+
 app = webapp2.WSGIApplication([
     (r'/api/players/register', RegisterHandler),
     (r'/api/players/my', MyHandler),
     (r'/api/players/stopDoing', StopDoingHandler),
+    (r'/api/players/newConfig', NewConfigHandler),
+    (r'/api/players/updateConfig', UpdateConfigHandler),
+    (r'/api/players/deleteConfig', DeleteConfigHandler),
 ], debug=True)

@@ -11,7 +11,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
 
         var modalInstance = $modal.open({
             animation: true,
-            templateUrl: 'createTeamDialogContent.html',
+            templateUrl: 'createTeamDialog.html',
             controller: 'CreateTeamDialogController',
         });
 
@@ -26,10 +26,9 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
     };
 
     $scope.openApplyTeamDialog = function() {
-
         var modalInstance = $modal.open({
             animation: true,
-            templateUrl: 'applyTeamDialogContent.html',
+            templateUrl: 'applyTeamDialog.html',
             controller: 'ApplyTeamDialogController',
         });
 
@@ -40,7 +39,6 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
             // Canceled
             }, function () {}
         );
-
     }
 
     $scope.acceptApplication = function(application) {
@@ -121,21 +119,24 @@ app.controller('ApplyTeamDialogController', function ($scope, $modalInstance, $h
     // IMPORTANT CONTROLLER VARIABLES
     $scope.teams = undefined;
 
-    $scope.ok = function () {
-        $modalInstance.close({ // return data to dialog opener
-            team_id: $scope.team_id,
-            text: $scope.application_text
-        });
-    };
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-
+    // CONSTRUCTOR
     $http.get('/api/teams/all').
         then(function(response) {
             $scope.teams = response.data;
         }, function(response) {
             AlertError(response);
         });
+
+    // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
+    $scope.ok = function () {
+        $modalInstance.close({ // return data to dialog opener
+            team_id: $scope.team_id,
+            text: $scope.application_text
+        });
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
 
 });

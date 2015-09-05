@@ -1,5 +1,4 @@
 <div id="playerView" class="row view" ng-controller="PlayerController as playerController">
-
     <div class="col-xs-12 col-sm-6 col-md-5">
         <div ng-show="player == null && !loading_player" ng-cloak>
             <h1>Register player</h1>
@@ -9,8 +8,8 @@
                 <button type="submit" form="registerPlayerForm" value="Submit" class="btn btn-primary">Register!</button>
             </form>
         </div>
-
     </div>
+
     <div class="col-xs-12">
         <div ng-show="player != null && !loading_player" ng-cloak>
             <h1>{{player.nick}}</h1>
@@ -20,6 +19,9 @@
             <div>Doing: <span ng-show="player.doing == null">nothing</span>{{player.doing.what}} <span ng-show="player.doing.queued">({{player.doing.queued}} queued)</span></div>
 
             <div class="btn-toolbar margin-vertical">
+                <button ng-click="openPlayerConfigDialog()" class="btn btn-primary">Player configuration</button>
+            </div>
+            <div class="btn-toolbar margin-vertical">
                 <button ng-show="player.doing == null" ng-click="playAgainstBots()" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Play against bots</button>
                 <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Unranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join unranked solo queue</button>
                 <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Ranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join ranked solo queue</button>
@@ -27,5 +29,38 @@
             </div>
         </div>
     </div>
-
 </div>
+
+<script type="text/ng-template" id="playerConfigDialog.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Player config</h3>
+    </div>
+    <div class="modal-body">
+
+        <label for="playerConfigSelect">Configurations:</label>
+
+        <div class="input-group">
+            <select ng-model="selectedConfigId" ng-change="setSelectedConfig()" class="form-control" id="playerConfigSelect">
+                <option ng-repeat="config in player.configs | orderBy:'name'" value="{{config.id}}">{{config.name}}</option>
+            </select>
+           <span class="input-group-btn">
+                <button ng-click="createNewConfig()" class="btn btn-primary" ng-disabled="isCreatingNewConfig">+</button>
+           </span>
+        </div>
+        <br/>
+
+        <form role="form" ng-show="selectedConfig != null">
+            <div class="form-group">
+                <label for="playerConfigEmail">Config name</label>
+                <input type="text" ng-model="selectedConfig.name" ng-required="true" class="form-control" id="playerConfigEmail">
+            </div>
+            <div class="btn-toolbar margin-vertical">
+                <button ng-click="updateConfig()" class="btn btn-primary" ng-disabled="isUpdatingOrDeletingConfig">Update selected config</button>
+                <button ng-click="deleteConfig()" class="btn btn-danger" ng-disabled="isUpdatingOrDeletingConfig">Delete selected config</button>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
+    </div>
+</script>

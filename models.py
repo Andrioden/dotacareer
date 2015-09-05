@@ -7,6 +7,7 @@ from google.appengine.api import channel
 import json
 from datetime import datetime
 
+
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
     nick = ndb.StringProperty(required=True)
@@ -22,27 +23,50 @@ class Player(ndb.Model):
         }
 
     def get_data(self, detail_level="simple"):
-        match_keys = [match_player.match for match_player in MatchPlayer.query(MatchPlayer.player == self.key).fetch()]
-        matches_data = [match.get_data("simple") for match in ndb.get_multi(match_keys)]
-
-        return {
+        data = {
             'id': self.key.id(),
             'nick': self.nick,
             'skill': int(self.skill / 1000.0),
             'team': self.team.get().get_data(detail_level) if self.team else None,
             'doing': self.doing.get().get_data() if self.doing else None,
-            'energy': self.energy,
-            'matches': matches_data
+            'energy': self.energy
         }
+
+        if detail_level == "full":
+            match_keys = [match_player.match for match_player in MatchPlayer.query(MatchPlayer.player == self.key).fetch()]
+            matches_data = [match.get_data("simple") for match in ndb.get_multi(match_keys)]
+            data.update({
+                'matches': matches_data,
+                'configs': [config.get_data() for config in PlayerConfig.query(PlayerConfig.player == self.key).fetch()]
+            })
+
+        return data
 
     def clear_doing(self):
         self.doing.delete()
         self.doing = None
         self.put()
 
-
     def websocket_notify(self, event, value):
         channel.send_message(self.userid, json.dumps({'event': event, 'value': value}))
+
+
+class PlayerConfig(ndb.Model):
+    player = ndb.KeyProperty(kind=Player)
+    name = ndb.StringProperty(default="New config")
+    #coqnitive_focus =
+    farm_weight = ndb.IntegerProperty(default=0)
+    gank_weight = ndb.IntegerProperty(default=0)
+    push_weight = ndb.IntegerProperty(default=0)
+
+    def get_data(self):
+        return {
+            'id': self.key.id(),
+            'name': self.name,
+            'farm_weight': self.farm_weight,
+            'gank_weight': self.gank_weight,
+            'push_weight': self.push_weight
+        }
 
 
 class Team(ndb.Model):
@@ -118,7 +142,7 @@ class Match(ndb.Model):
     def play_bot_match(self, player):
         # Add player as combatant
         shuffled_factions_spots = self._get_shuffled_factions_spots()
-        self.cached_combatants = [] # Cached so the data can be used without hitting db in get_data method
+        self.cached_combatants = []  # Cached so the data can be used without hitting db in get_data method
         self.cached_combatants.append(MatchPlayer(
             player=player.key,
             faction=shuffled_factions_spots.pop(0)
@@ -134,14 +158,13 @@ class Match(ndb.Model):
         self._simulate_match()
         self._save_data()
 
-
     def get_data(self, detail_level="simple"):
         data = {
             'id': self.key.id(),
             'winning_faction': self.winning_faction,
             'type': self.type,
             'date': self.date.strftime("%Y-%m-%d, %H:%M"),
-            'date_epoch': int((self.date - datetime(1970,1,1)).total_seconds()),
+            'date_epoch': int((self.date - datetime(1970, 1, 1)).total_seconds()),
         }
 
         if detail_level == "full":
@@ -156,7 +179,7 @@ class Match(ndb.Model):
         return data
 
     def _simulate_match(self):
-        self.winning_faction = 'Dire' if randint(0,1) == 0 else 'Radiant'
+        self.winning_faction = 'Dire' if randint(0, 1) == 0 else 'Radiant'
 
     def _save_data(self):
         self.put()

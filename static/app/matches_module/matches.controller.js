@@ -4,7 +4,7 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
     $scope.openMatchDialog = function (match) {
         var modalInstance = $modal.open({
             animation: true,
-            templateUrl: 'matchDialogContent.html',
+            templateUrl: 'matchDialog.html',
             controller: 'MatchDialogController',
             resolve: { // Data passed to the dialog, has to be a function. Its the angularjs pattern for it i guess
                 match: function() {return match;}
@@ -25,18 +25,12 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
 });
 
 
-app.controller('MatchDialogController', function ($rootScope, $scope, $modalInstance, $http, match) {
+app.controller('MatchDialogController', function ($scope, $modalInstance, $http, match) {
 
     // IMPORTANT CONTROLLER VARIABLES
     $scope.match = match;
 
-    $scope.ok = function () {
-        $modalInstance.close();
-    };
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-
+    // CONSTRUCTOR
     if (!isMatchDetailed($scope.match)) {
         $http.get('/api/matches/rest/'+match.id).
             then(function(response) {
@@ -46,6 +40,12 @@ app.controller('MatchDialogController', function ($rootScope, $scope, $modalInst
             });
     }
 
+    // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+
+    // PRIVATE FUNCTIONS
     function isMatchDetailed(match) {
         if(typeof match.combatants === 'undefined') return false;
         else return true;
