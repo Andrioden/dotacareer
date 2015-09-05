@@ -41,8 +41,8 @@ class Player(ndb.Model):
         self.put()
 
 
-    def websocket_notify(self, type, value):
-        channel.send_message(self.userid, json.dumps({'type': type, 'value': value}))
+    def websocket_notify(self, event, value):
+        channel.send_message(self.userid, json.dumps({'event': event, 'value': value}))
 
 
 class Team(ndb.Model):
@@ -72,7 +72,7 @@ class TeamApplication(ndb.Model):
     def get_data(self):
         return {
             'id': self.key.id(),
-            'player': self.player.get().get_data(),
+            'player': self.player.get().get_data_nick_and_id(),
             'text': self.text
         }
 

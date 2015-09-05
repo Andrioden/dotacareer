@@ -1,4 +1,10 @@
-app.controller('TeamController', function ($rootScope, $scope, $modal, $http) {
+app.controller('TeamController', function ($rootScope, $scope, $http, $modal, WebSocketService) {
+
+    // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
+    WebSocketService.subscribe("NewTeamApplication", function(newTeamApplication){
+        $rootScope.player.team.applications.push(newTeamApplication);
+        $rootScope.$apply();
+    });
 
     // EXPOSED ACTIONS FOR HTML
     $scope.openCreateTeamDialog = function () {
@@ -47,10 +53,10 @@ app.controller('TeamController', function ($rootScope, $scope, $modal, $http) {
             });
     }
 
-    $scope.declineApplication = function(application_id) {
-        $http.post('/api/teams/declineApplication', {application_id: application_id}).
+    $scope.declineApplication = function(application) {
+        $http.post('/api/teams/declineApplication', {application_id: application.id}).
             then(function(response) {
-                deleteApplication(application_id);
+                deleteApplication(application.id);
             }, function(response) {
                 AlertError(response);
             });
@@ -78,7 +84,7 @@ app.controller('TeamController', function ($rootScope, $scope, $modal, $http) {
     }
 
     function applyToTeam(api_data) {
-        $http.post('/api/teams/apply', api_data).
+        $http.post('/api/teams/sendApplication', api_data).
             then(function(response) {
                 console.log(response)
             }, function(response) {

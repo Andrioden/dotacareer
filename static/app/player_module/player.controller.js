@@ -2,6 +2,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
     // IMPORTANT SCOPE VARIABLES
     $rootScope.player = undefined;
 
+    // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
     WebSocketService.subscribe("NewPlayerDoingQueueCount", function(newMatchQueueCount){
         if ($rootScope.player.doing) $rootScope.player.doing.queued = newMatchQueueCount;
         $rootScope.$apply();

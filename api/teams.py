@@ -39,11 +39,12 @@ class AllHandler(webapp2.RequestHandler):
         set_json_response(self.response, [team.get_data() for team in Team.query().fetch()])
 
 
-class ApplyHandler(webapp2.RequestHandler):
+class SendApplicationHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player =  current_user_player()
+        player = current_user_player()
+        team_key = ndb.Key(Team, int(request_data['team_id']))
 
         # VALIDATIONS
         if not validate_request_data(self.response, request_data, ['team_id']):
@@ -53,11 +54,14 @@ class ApplyHandler(webapp2.RequestHandler):
         elif not _validate_has_no_team(self.response, player):
             return
 
-        TeamApplication(
-            team=ndb.Key(Team, int(request_data['team_id'])),
+        team_application = TeamApplication(
+            team=team_key,
             player=player.key,
             text=request_data['text']
-        ).put()
+        ).put().get()
+
+        for team_player in Player.query(Player.team == team_key).fetch():
+            team_player.websocket_notify('NewTeamApplication', team_application.get_data())
 
         set_json_response(self.response, {'code': "OK"})
 
@@ -123,9 +127,6 @@ class KickMemberHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
-
-
-
 def _validate_has_no_team(response, player):
     if player.team:
         error_400(response, "ERROR_HAS_TEAM", "Your player can only be part of 1 team.")
@@ -141,10 +142,11 @@ def _validate_is_team_owner(response, player, team):
     else:
         return True
 
+
 app = webapp2.WSGIApplication([
     (r'/api/teams/register', RegisterHandler),
     (r'/api/teams/all', AllHandler),
-    (r'/api/teams/apply', ApplyHandler),
+    (r'/api/teams/sendApplication', SendApplicationHandler),
     (r'/api/teams/acceptApplication', AcceptApplicationHandler),
     (r'/api/teams/declineApplication', DeclineApplicationHandler),
     (r'/api/teams/kickMember', KickMemberHandler),
