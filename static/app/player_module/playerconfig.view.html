@@ -1,0 +1,72 @@
+<script type="text/ng-template" id="playerConfigDialog.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Player config</h3>
+    </div>
+    <div class="modal-body">
+
+        <label for="playerConfigSelect">Select configuration</label>
+
+        <div class="input-group">
+            <select ng-init="selectedConfigId = selectedConfigId || player.configs[0].id" ng-model="selectedConfigId" ng-change="setSelectedConfig()" class="form-control" id="playerConfigSelect">
+                <option ng-repeat="config in player.configs | orderBy:'name'" value="{{config.id}}" ng-selected="config.active">
+                    {{config.active ? config.name + ' (active)' : config.name}}
+                </option>
+            </select>
+           <span class="input-group-btn">
+                <button ng-click="createNewConfig()" class="btn btn-primary" ng-disabled="isCreatingNewConfig">+</button>
+           </span>
+        </div>
+        <br/>
+        <br/>
+        <br/>
+
+        <form role="form" ng-show="selectedConfig != null" class="form-horizontal">
+
+            <!--NAME-->
+            <div class="form-group">
+                <label for="playerConfigEmail" class="col-sm-3 control-label">Name</label>
+                <div class="col-sm-9">
+                    <input type="text" ng-model="selectedConfig.name" ng-required="true" class="form-control" id="playerConfigEmail">
+                </div>
+            </div>
+
+            <!--FARM WEIGHT-->
+            <div class="form-group">
+                <label for="playerConfigFarmWeight" class="col-sm-3 control-label">Farm weight</label>
+                <div class="col-sm-8">
+                    <input type="range" ng-model="selectedConfig.farm_weight" min="0" max="100" id="playerConfigFarmWeight">
+                </div>
+                <div class="col-sm-1">{{selectedConfig.farm_weight}}</div>
+            </div>
+
+            <!--GANK WEIGHT-->
+            <div class="form-group">
+                <label for="playerConfigGankWeight" class="col-sm-3 control-label">Gank weight</label>
+                <div class="col-sm-8">
+                    <input type="range" ng-model="selectedConfig.gank_weight" min="0" max="100" id="playerConfigGankWeight">
+                </div>
+                <div class="col-sm-1">{{selectedConfig.gank_weight}}</div>
+            </div>
+
+            <!--PUSH WEIGHT-->
+            <div class="form-group">
+                <label for="playerConfigPushWeight" class="col-sm-3 control-label">Push weight</label>
+                <div class="col-sm-8">
+                    <input type="range" ng-model="selectedConfig.push_weight" min="0" max="100" id="playerConfigPushWeight">
+                </div>
+                <div class="col-sm-1">{{selectedConfig.push_weight}}</div>
+            </div>
+
+            <div class="btn-toolbar margin-vertical">
+                <button ng-show="selectedConfig.active" class="btn btn-success">Is active</button>
+                <button ng-show="!selectedConfig.active" ng-click="setSelectedConfigAsActiveConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Set as active</button>
+                <button ng-click="updateSelectedConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Update</button>
+                <button ng-click="deleteSelectedConfig()" class="btn btn-danger" ng-disabled="isDoingConfigAction">Delete</button>
+            </div>
+        </form>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
+    </div>
+</script>

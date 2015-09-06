@@ -81,11 +81,14 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         if not config.player == player.key:
             error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant update another players config. You api-hacking or what?")
             return
-        if not validate_request_data(self.response, request_data, ['name']):
+        if not validate_request_data(self.response, request_data, ['name', 'farm_weight', 'gank_weight', 'push_weight']):
             return
 
         # UPDATE
         config.name = request_data['name']
+        config.farm_weight = int(request_data['farm_weight'])
+        config.gank_weight = int(request_data['gank_weight'])
+        config.push_weight = int(request_data['push_weight'])
         config.put()
 
         set_json_response(self.response, {'code': "OK"})
@@ -108,6 +111,29 @@ class DeleteConfigHandler(webapp2.RequestHandler):
 
         set_json_response(self.response, {'code': "OK"})
 
+
+class SetActiveConfigHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        logging.info(request_data)
+        player = current_user_player()
+        config = PlayerConfig.get_by_id(int(request_data['id']))
+
+        # VALIDATION
+        if not config.player == player.key:
+            error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant delete another players config. You api-hacking or what?")
+            return
+
+        # UPDATE
+        for active_config in PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).fetch():
+            active_config.active = False
+            active_config.put()
+
+        config.active = True
+        config.put()
+
+        set_json_response(self.response, {'code': "OK"})
+
 app = webapp2.WSGIApplication([
     (r'/api/players/register', RegisterHandler),
     (r'/api/players/my', MyHandler),
@@ -115,4 +141,5 @@ app = webapp2.WSGIApplication([
     (r'/api/players/newConfig', NewConfigHandler),
     (r'/api/players/updateConfig', UpdateConfigHandler),
     (r'/api/players/deleteConfig', DeleteConfigHandler),
+    (r'/api/players/setActiveConfig', SetActiveConfigHandler),
 ], debug=True)

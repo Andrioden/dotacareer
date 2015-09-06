@@ -30,37 +30,3 @@
         </div>
     </div>
 </div>
-
-<script type="text/ng-template" id="playerConfigDialog.html">
-    <div class="modal-header">
-        <h3 class="modal-title">Player config</h3>
-    </div>
-    <div class="modal-body">
-
-        <label for="playerConfigSelect">Configurations:</label>
-
-        <div class="input-group">
-            <select ng-model="selectedConfigId" ng-change="setSelectedConfig()" class="form-control" id="playerConfigSelect">
-                <option ng-repeat="config in player.configs | orderBy:'name'" value="{{config.id}}">{{config.name}}</option>
-            </select>
-           <span class="input-group-btn">
-                <button ng-click="createNewConfig()" class="btn btn-primary" ng-disabled="isCreatingNewConfig">+</button>
-           </span>
-        </div>
-        <br/>
-
-        <form role="form" ng-show="selectedConfig != null">
-            <div class="form-group">
-                <label for="playerConfigEmail">Config name</label>
-                <input type="text" ng-model="selectedConfig.name" ng-required="true" class="form-control" id="playerConfigEmail">
-            </div>
-            <div class="btn-toolbar margin-vertical">
-                <button ng-click="updateConfig()" class="btn btn-primary" ng-disabled="isUpdatingOrDeletingConfig">Update selected config</button>
-                <button ng-click="deleteConfig()" class="btn btn-danger" ng-disabled="isUpdatingOrDeletingConfig">Delete selected config</button>
-            </div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
-    </div>
-</script>

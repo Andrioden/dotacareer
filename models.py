@@ -52,8 +52,10 @@ class Player(ndb.Model):
 
 
 class PlayerConfig(ndb.Model):
+    # RENAME TIL FOCUS
     player = ndb.KeyProperty(kind=Player)
     name = ndb.StringProperty(default="New config")
+    active = ndb.BooleanProperty(default=False)
     #coqnitive_focus =
     farm_weight = ndb.IntegerProperty(default=0)
     gank_weight = ndb.IntegerProperty(default=0)
@@ -63,6 +65,7 @@ class PlayerConfig(ndb.Model):
         return {
             'id': self.key.id(),
             'name': self.name,
+            'active': self.active,
             'farm_weight': self.farm_weight,
             'gank_weight': self.gank_weight,
             'push_weight': self.push_weight
