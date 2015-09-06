@@ -81,14 +81,9 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         if not config.player == player.key:
             error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant update another players config. You api-hacking or what?")
             return
-        if not validate_request_data(self.response, request_data, ['name', 'farm_weight', 'gank_weight', 'push_weight']):
-            return
 
         # UPDATE
         config.name = request_data['name']
-        config.farm_weight = int(request_data['farm_weight'])
-        config.gank_weight = int(request_data['gank_weight'])
-        config.push_weight = int(request_data['push_weight'])
         config.put()
 
         set_json_response(self.response, {'code': "OK"})
@@ -121,7 +116,7 @@ class SetActiveConfigHandler(webapp2.RequestHandler):
 
         # VALIDATION
         if not config.player == player.key:
-            error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant delete another players config. You api-hacking or what?")
+            error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You activate another players config. You api-hacking or what?")
             return
 
         # UPDATE

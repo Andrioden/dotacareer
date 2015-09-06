@@ -1,0 +1,26 @@
+- PlayerSkills (Training/increasing/decreasing)
+    - MID
+    - OFF LANE
+    - SUPPORT
+    - CARRY
+    - FARM
+    - GANK
+    - PUSH
+
+- HeroSkills (static, defined, config)
+    - as mid
+    - as off lane
+    - as support
+    - as carry
+    - as farm
+    - as gank
+    - as push
+
+- PlayerHeroSkills (training/increasing/decreasing)
+    - as mid
+    - as off lane
+    - as support
+    - as carry
+    - as farm
+    - as gank
+    - as push

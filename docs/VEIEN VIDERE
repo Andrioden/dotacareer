@@ -1,0 +1,27 @@
+ALTERNATIV 0: Dota Career - Play as single player - no real time simulator
+- Chose what player he wants to train as by selecting a priority list 1-110 with heroes and roles.
+- Part of a team, social
+
+- GOAL 1:
+    - Configure 10 heroes
+    - Andre and BT play against eachother with 5 created players each
+    - Play against Bots: Always picks top hero
+    - Play against (un)ranked: picks somewhat random of the top 5 hero choises.
+
+
+ALTERNATIV 1: Dota Career - Play as single player - real time simulator
+- Chose what player he wants to train as by selecting a priority list 1-110 with heroes and roles.
+- Part of a team, social
+- Makes decision as the game progress (the game can last for 1-5min or so)
+    - Early game:
+        - Example: "You are put as farm bot, what do you do against Puck, Viper, Spectre": [Farm normal, Go woods, Defensive Farm]
+    - Mid game:
+        - Example: "You are most likely down on gold and xp, what do you do": [Try to play 5man doto, farm more, look for ganks]
+    - All has to be online, or random choice is made.
+
+
+ALTERNATIV 2: Dota Manager - Convert to Team Management
+- 5 players that team manager choses what to train as
+- Scouting for new heroes
+- Pregame config
+- Handling egos, injuries and tilting players.

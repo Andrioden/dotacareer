@@ -30,33 +30,6 @@
                 </div>
             </div>
 
-            <!--FARM WEIGHT-->
-            <div class="form-group">
-                <label for="playerConfigFarmWeight" class="col-sm-3 control-label">Farm weight</label>
-                <div class="col-sm-8">
-                    <input type="range" ng-model="selectedConfig.farm_weight" min="0" max="100" id="playerConfigFarmWeight">
-                </div>
-                <div class="col-sm-1">{{selectedConfig.farm_weight}}</div>
-            </div>
-
-            <!--GANK WEIGHT-->
-            <div class="form-group">
-                <label for="playerConfigGankWeight" class="col-sm-3 control-label">Gank weight</label>
-                <div class="col-sm-8">
-                    <input type="range" ng-model="selectedConfig.gank_weight" min="0" max="100" id="playerConfigGankWeight">
-                </div>
-                <div class="col-sm-1">{{selectedConfig.gank_weight}}</div>
-            </div>
-
-            <!--PUSH WEIGHT-->
-            <div class="form-group">
-                <label for="playerConfigPushWeight" class="col-sm-3 control-label">Push weight</label>
-                <div class="col-sm-8">
-                    <input type="range" ng-model="selectedConfig.push_weight" min="0" max="100" id="playerConfigPushWeight">
-                </div>
-                <div class="col-sm-1">{{selectedConfig.push_weight}}</div>
-            </div>
-
             <div class="btn-toolbar margin-vertical">
                 <button ng-show="selectedConfig.active" class="btn btn-success">Is active</button>
                 <button ng-show="!selectedConfig.active" ng-click="setSelectedConfigAsActiveConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Set as active</button>
