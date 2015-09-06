@@ -15,10 +15,10 @@
         <table class="table" ng-show="player.matches.length > 0">
             <tbody>
             <tr ng-repeat="match in player.matches | orderBy:'-date_epoch'">
-                <td class="col-sm-4">{{match.id}}</td>
-                <td class="col-sm-3">{{match.date}}</td>
-                <td class="col-sm-2">{{match.type}}</td>
-                <td class="col-sm-4">{{match.winning_faction}} won</td>
+                <td>{{match.id}}</td>
+                <td>{{match.date}}</td>
+                <td>{{match.type}}</td>
+                <td>{{match.winning_faction}} won</td>
                 <td>
                     <div class="btn-toolbar pull-right">
                         <button ng-click="openMatchDialog(match)" class="btn btn-xs btn-primary">Load details</button>
