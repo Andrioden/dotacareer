@@ -1,4 +1,4 @@
-from heroes import heroes
+from heroes_metrics import heroes_metrics
 import json
 import operator
 
@@ -9,7 +9,7 @@ def print_sorted_pretty(list):
 
 if __name__ == '__main__':
     heroes_potentials = []
-    for hero_name, config in heroes.iteritems():
-        potentials_sum = sum(config['potentials'].values())
-        heroes_potentials.append([potentials_sum, hero_name])
+    for hero in heroes_metrics:
+        potentials_sum = sum(hero['potentials'].values())
+        heroes_potentials.append([potentials_sum, hero['name']])
     print_sorted_pretty(heroes_potentials)

@@ -15,17 +15,17 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
 
     // LOAD CURRENT PLAYER IF POSSIBLE
     $rootScope.player = null;
-    $rootScope.loading_player = true;
+    $rootScope.loadingPlayer = true;
     $http.get('/api/players/my').
         then(function(response) {
             if (response.data.has_player) {
                 $rootScope.player = response.data.player;
                 GLOBAL_VAR_LOL = $rootScope.player
             }
-            $rootScope.loading_player = false;
+            $rootScope.loadingPlayer = false;
         }, function(response) {
             AlertError(response);
-            $rootScope.loading_player = false;
+            $rootScope.loadingPlayer = false;
         });
 
     // EXPOSED ACTIONS FOR HTML

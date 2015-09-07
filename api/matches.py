@@ -70,7 +70,7 @@ class PlayAgainstBotsHandler(webapp2.RequestHandler):
         bot_match = Match(type="Bot")
         bot_match.play_bot_match(player)
 
-        return set_json_response(self.response, {'match': bot_match.get_data("full")})
+        set_json_response(self.response, {'match': bot_match.get_data("full")})
 
 
 class RESTHandler(webapp2.RequestHandler):

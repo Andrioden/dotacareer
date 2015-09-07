@@ -120,7 +120,7 @@ app.controller('ApplyTeamDialogController', function ($scope, $modalInstance, $h
     $scope.teams = undefined;
 
     // CONSTRUCTOR
-    $http.get('/api/teams/all').
+    $http.get('/api/teams/rest/', {cache: true}).
         then(function(response) {
             $scope.teams = response.data;
         }, function(response) {

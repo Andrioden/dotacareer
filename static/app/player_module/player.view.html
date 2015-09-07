@@ -1,6 +1,6 @@
 <div id="playerView" class="row view" ng-controller="PlayerController as playerController">
     <div class="col-xs-12 col-sm-6 col-md-5">
-        <div ng-show="player == null && !loading_player" ng-cloak>
+        <div ng-show="player == null && !loadingPlayer" ng-cloak>
             <h1>Register player</h1>
 
             <form id="registerPlayerForm" name="registerPlayerForm" ng-submit="submitPlayer()">
@@ -11,7 +11,7 @@
     </div>
 
     <div class="col-xs-12">
-        <div ng-show="player != null && !loading_player" ng-cloak>
+        <div ng-show="player != null && !loadingPlayer" ng-cloak>
             <h1>{{player.nick}}</h1>
 
             <div>Skill: {{player.skill}}</div>

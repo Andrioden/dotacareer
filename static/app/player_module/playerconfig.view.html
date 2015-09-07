@@ -5,9 +5,8 @@
     <div class="modal-body">
 
         <label for="playerConfigSelect">Select configuration</label>
-
         <div class="input-group">
-            <select ng-init="selectedConfigId = selectedConfigId || player.configs[0].id" ng-model="selectedConfigId" ng-change="setSelectedConfig()" class="form-control" id="playerConfigSelect">
+            <select ng-model="selectedConfigId" ng-change="setSelectedConfig()" class="form-control" id="playerConfigSelect">
                 <option ng-repeat="config in player.configs | orderBy:'name'" value="{{config.id}}" ng-selected="config.active">
                     {{config.active ? config.name + ' (active)' : config.name}}
                 </option>
@@ -18,25 +17,45 @@
         </div>
         <br/>
         <br/>
+
+        <!--NAME-->
+        <div ng-show="selectedConfig != null">
+            <label for="playerConfigEmail">Name</label>
+            <input type="text" ng-model="selectedConfig.name" class="form-control" id="playerConfigEmail">
+        </div>
         <br/>
 
-        <form role="form" ng-show="selectedConfig != null" class="form-horizontal">
-
-            <!--NAME-->
-            <div class="form-group">
-                <label for="playerConfigEmail" class="col-sm-3 control-label">Name</label>
-                <div class="col-sm-9">
-                    <input type="text" ng-model="selectedConfig.name" ng-required="true" class="form-control" id="playerConfigEmail">
+        <label>Hero Priority</label>
+        <form name="registration_form" id="registration_form" class="form-horizontal">
+            <div ng-repeat="heroPriority in heroPriorityList" class="form-group">
+                <div class="col-sm-6">
+                    <select ng-model="heroPriority.name" class="form-control">
+                        <option ng-repeat="hero in heroes | orderBy:'name'" value="{{hero.name}}">
+                            {{hero.name}}
+                        </option>
+                    </select>
                 </div>
-            </div>
-
-            <div class="btn-toolbar margin-vertical">
-                <button ng-show="selectedConfig.active" class="btn btn-success">Is active</button>
-                <button ng-show="!selectedConfig.active" ng-click="setSelectedConfigAsActiveConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Set as active</button>
-                <button ng-click="updateSelectedConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Update</button>
-                <button ng-click="deleteSelectedConfig()" class="btn btn-danger" ng-disabled="isDoingConfigAction">Delete</button>
+                <div class="col-sm-1">as</div>
+                <div class="col-sm-4">
+                    <select  ng-model="heroPriority.role" class="form-control">
+                        <option  value="mid">mid</option>
+                    </select>
+                </div>
+                <button ng-click="removeHeroPriority($index)" class="btn btn-danger col-sm-1">-</button>
             </div>
         </form>
+        <button ng-click="addHeroPriority()" class="btn btn-primary" ng-disabled="isDoingConfigAction">+</button>
+        <br/>
+        <br/>
+        <br/>
+
+        <!--BUTTON TOOLBAR-->
+        <div class="btn-toolbar margin-vertical">
+            <button ng-show="selectedConfig.active" class="btn btn-success">Is active</button>
+            <button ng-show="!selectedConfig.active" ng-click="setSelectedConfigAsActiveConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Set as active</button>
+            <button ng-click="updateSelectedConfig()" class="btn btn-primary" ng-disabled="isDoingConfigAction">Update</button>
+            <button ng-click="deleteSelectedConfig()" class="btn btn-danger" ng-disabled="isDoingConfigAction">Delete</button>
+        </div>
 
     </div>
     <div class="modal-footer">

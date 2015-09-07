@@ -34,7 +34,7 @@ class RegisterHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'team': new_team.get_data(), 'player': player.get_data()})
 
 
-class AllHandler(webapp2.RequestHandler):
+class TeamsHandler(webapp2.RequestHandler):
     def get(self):
         set_json_response(self.response, [team.get_data() for team in Team.query().fetch()])
 
@@ -145,7 +145,7 @@ def _validate_is_team_owner(response, player, team):
 
 app = webapp2.WSGIApplication([
     (r'/api/teams/register', RegisterHandler),
-    (r'/api/teams/all', AllHandler),
+    (r'/api/teams/rest/', TeamsHandler),
     (r'/api/teams/sendApplication', SendApplicationHandler),
     (r'/api/teams/acceptApplication', AcceptApplicationHandler),
     (r'/api/teams/declineApplication', DeclineApplicationHandler),

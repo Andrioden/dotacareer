@@ -18,9 +18,10 @@ late game
 """
 
 
-heroes = {
+heroes_metrics = [
     # MID
-    'Pudge': {
+    {
+        'name': 'Pudge',
         'potentials':  {
             'mid': 75,
             'off_lane': 25,
@@ -31,7 +32,8 @@ heroes = {
             'push': 25
         }
     },
-    'Anti-Mage': {
+    {
+        'name': 'Anti-Mage',
         'potentials': {
             'mid': 25,
             'off_lane': 50,
@@ -42,7 +44,8 @@ heroes = {
             'push': 25
         }
     },
-    'Shadow Fiend': {
+    {
+        'name': 'Shadow Fiend',
         'potentials': {
             'mid': 75,
             'off_lane': 0,
@@ -54,7 +57,8 @@ heroes = {
         }
 
     },
-    'Techies': {
+    {
+        'name': 'Techies',
         'potentials': {
             'mid': 25,
             'off_lane': 25,
@@ -65,7 +69,8 @@ heroes = {
             'push': 100
         }
     },
-    'Tidehunter': {
+    {
+        'name': 'Tidehunter',
         'potentials': {
             'mid': 25,
             'off_lane': 100,
@@ -77,7 +82,8 @@ heroes = {
         }
 
     },
-    'Clockwerk': {
+    {
+        'name': 'Clockwerk',
         'potentials': {
             'mid': 50,
             'off_lane': 100,
@@ -89,7 +95,8 @@ heroes = {
         }
 
     },
-    'Tusk': {
+    {
+        'name': 'Tusk',
         'potentials': {
             'mid': 50,
             'off_lane': 50,
@@ -100,7 +107,8 @@ heroes = {
             'push': 50
         }
     },
-    'Crystal Maiden': {
+    {
+        'name': 'Crystal Maiden',
         'potentials': {
             'mid': 25,
             'off_lane': 0,
@@ -112,7 +120,8 @@ heroes = {
         }
 
     },
-    'Lion': {
+    {
+        'name': 'Lion',
         'potentials': {
             'mid': 50,
             'off_lane': 0,
@@ -124,7 +133,8 @@ heroes = {
         }
 
     },
-    'Omniknight': {
+    {
+        'name': 'Omniknight',
         'potentials': {
             'mid': 25,
             'off_lane': 50,
@@ -135,4 +145,4 @@ heroes = {
             'push': 25
         }
     },
-}
+]
