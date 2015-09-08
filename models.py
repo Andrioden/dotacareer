@@ -11,6 +11,7 @@ from datetime import datetime
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
     nick = ndb.StringProperty(required=True)
+    nick_lower = ndb.ComputedProperty(lambda self: self.nick.lower())
     skill = ndb.IntegerProperty(required=True)
     team = ndb.KeyProperty(kind='Team')
     doing = ndb.KeyProperty(default=None)

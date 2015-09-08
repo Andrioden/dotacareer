@@ -21,6 +21,9 @@ class RegisterHandler(webapp2.RequestHandler):
             return
         if not self._validate_has_not_player_already(user):
             return
+        if Player.query(Player.nick_lower == request_data['nick'].lower()).count() > 0:
+            error_400(self.response, "ERROR_NICK_TAKEN", "The nickname %s is already taken" % request_data['nick'])
+            return
 
         # REGISTER PLAYER
         new_player = Player(

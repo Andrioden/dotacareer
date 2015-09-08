@@ -25,6 +25,13 @@ class MainHandler(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
+class LogoutHandler(webapp2.RequestHandler):
+    def get(self):
+        logging.info("LOGGING OUT")
+        return webapp2.redirect(users.create_logout_url("/"))
+
+
 app = webapp2.WSGIApplication([
-    ('/.*', MainHandler)
+    ('/logout', LogoutHandler),
+    ('/.*', MainHandler),
 ], debug=True)

@@ -30,7 +30,7 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
         player.doing = match_queue_key
         player.put()
 
-        ndb.get_context().clear_cache() # If it isnt cleared the following count of queued players wont count this
+        ndb.get_context().clear_cache() # If it is not cleared the following count of queued players wont count this
         match_queue = match_queue_key.get()
         match = self._trigger_played_match(match_queue, player)
         if match:

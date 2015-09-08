@@ -31,6 +31,7 @@ class RegisterHandler(webapp2.RequestHandler):
         player.team = new_team.key
         player.put()
 
+        ndb.get_context().clear_cache() # Required to get the new player as part of the get_data
         set_json_response(self.response, {'team': new_team.get_data('full'), 'player': player.get_data()})
 
 
