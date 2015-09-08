@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 from random import shuffle, randint
-from gameconfig import EnergyConfig
+from gameconfig import EnergyConfig, CashConfig
 import logging
 from google.appengine.api import channel
 import json
@@ -15,6 +15,7 @@ class Player(ndb.Model):
     team = ndb.KeyProperty(kind='Team')
     doing = ndb.KeyProperty(default=None)
     energy = ndb.IntegerProperty(default=EnergyConfig.maxEnergy)
+    cash = ndb.FloatProperty(default=CashConfig.startingCash)
 
     def get_data_nick_and_id(self):
         return {
@@ -29,7 +30,8 @@ class Player(ndb.Model):
             'skill': int(self.skill / 1000.0),
             'team': self.team.get().get_data(detail_level) if self.team else None,
             'doing': self.doing.get().get_data() if self.doing else None,
-            'energy': self.energy
+            'energy': self.energy,
+            'cash': self.cash
         }
 
         if detail_level == "full":

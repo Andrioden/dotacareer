@@ -31,7 +31,7 @@ class RegisterHandler(webapp2.RequestHandler):
         player.team = new_team.key
         player.put()
 
-        set_json_response(self.response, {'team': new_team.get_data(), 'player': player.get_data()})
+        set_json_response(self.response, {'team': new_team.get_data('full'), 'player': player.get_data()})
 
 
 class TeamsHandler(webapp2.RequestHandler):

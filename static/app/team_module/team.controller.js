@@ -76,6 +76,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
         $http.post('/api/teams/register', {team_name: team_name}).
             then(function(response) {
                 $rootScope.player.team = response.data.team;
+                console.log(response);
             }, function(response) {
                 AlertError(response);
             });
