@@ -6,7 +6,7 @@ import logging
 from utils import *
 from models import Player, PlayerConfig
 from google.appengine.api import users
-
+from heroes_metrics import is_valid_hero_name
 
 class RegisterHandler(webapp2.RequestHandler):
     def post(self):
@@ -79,17 +79,33 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         logging.info(request_data)
         player = current_user_player()
         config = PlayerConfig.get_by_id(int(request_data['id']))
+        updated_hero_priorities = request_data['hero_priorities']
 
         # VALIDATION
         if not config.player == player.key:
             error_400(self.response, "ERROR_NOT_YOUR_PLAYER", "You cant update another players config. You api-hacking or what?")
             return
+        if not self._validate_hero_priorities(updated_hero_priorities):
+            return
 
         # UPDATE
         config.name = request_data['name']
+        config.hero_priorities = updated_hero_priorities
         config.put()
 
         set_json_response(self.response, {'code': "OK"})
+
+    def _validate_hero_priorities(self, hero_priorities):
+        for hero_priority in hero_priorities:
+            # VALIDATE HERO NAMES
+            if not is_valid_hero_name(hero_priority['name']):
+                error_400(self.response, "ERROR_BAD_HERO_NAME", "Hero name '%s' is not valid. You api-hacking or what?" % hero_priority['name'])
+                return False
+            # VALIDATE ROLES
+            if hero_priority['role'] not in ["mid", "support", "carry", "offlane"]:
+                error_400(self.response, "ERROR_BAD_ROLE", "Role '%s' is not valid. You api-hacking or what?" % hero_priority['role'])
+                return False
+        return True
 
 
 class DeleteConfigHandler(webapp2.RequestHandler):

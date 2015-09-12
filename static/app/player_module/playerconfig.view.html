@@ -25,20 +25,22 @@
         </div>
         <br/>
 
+        <!--HERO PRIORITIES-->
         <label>Hero Priority</label>
-        <form name="registration_form" id="registration_form" class="form-horizontal">
-            <div ng-repeat="heroPriority in heroPriorityList" class="form-group">
+        <form class="form-horizontal">
+            <div ng-repeat="heroPriority in selectedConfig.hero_priorities" class="form-group">
                 <div class="col-sm-6">
                     <select ng-model="heroPriority.name" class="form-control">
-                        <option ng-repeat="hero in heroes | orderBy:'name'" value="{{hero.name}}">
-                            {{hero.name}}
-                        </option>
+                        <option ng-repeat="hero in heroes | orderBy:'name'" value="{{hero.name}}" ng-selected="heroPriority.name == hero.name">{{hero.name}}</option>
                     </select>
                 </div>
                 <div class="col-sm-1">as</div>
                 <div class="col-sm-4">
                     <select  ng-model="heroPriority.role" class="form-control">
-                        <option  value="mid">mid</option>
+                        <option  value="mid">Mid</option>
+                        <option  value="support">Support</option>
+                        <option  value="carry">Carry</option>
+                        <option  value="offlane">Offlane</option>
                     </select>
                 </div>
                 <button ng-click="removeHeroPriority($index)" class="btn btn-danger col-sm-1">-</button>

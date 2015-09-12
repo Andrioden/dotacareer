@@ -146,3 +146,9 @@ heroes_metrics = [
         }
     },
 ]
+
+def is_valid_hero_name(hero_name):
+    for hero in heroes_metrics:
+        if hero['name'] == hero_name:
+            return True
+    return False

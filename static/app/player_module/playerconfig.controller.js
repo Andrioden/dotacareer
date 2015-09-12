@@ -3,11 +3,6 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     $scope.selectedConfigId = null;
     $scope.selectedConfig = null;
 
-    $scope.heroPriorityList = [
-        {name: "Puck", role: "Mid"},
-        {name: "Pudge", role: "Off lane"}
-    ];
-
     // CONSTRUCTOR
     setActiveConfigAsSelectedConfig();
 
@@ -47,15 +42,14 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     $scope.isDoingConfigAction = false;
 
     $scope.updateSelectedConfig = function() {
-        console.log($scope.heroPriorityList)
-//        $scope.isDoingConfigAction = true;
-//        $http.post('/api/players/updateConfig', $scope.selectedConfig).
-//            then(function(response) {
-//                $scope.isDoingConfigAction = false;
-//            }, function(response) {
-//                AlertError(response);
-//                $scope.isDoingConfigAction = false;
-//            });
+        $scope.isDoingConfigAction = true;
+        $http.post('/api/players/updateConfig', $scope.selectedConfig).
+            then(function(response) {
+                $scope.isDoingConfigAction = false;
+            }, function(response) {
+                AlertError(response);
+                $scope.isDoingConfigAction = false;
+            });
     }
 
     $scope.deleteSelectedConfig = function() {
@@ -87,11 +81,11 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     }
 
     $scope.removeHeroPriority = function(index) {
-        $scope.heroPriorityList.splice(index,1);
+        $scope.selectedConfig.hero_priorities.splice(index,1);
     }
 
     $scope.addHeroPriority = function() {
-        $scope.heroPriorityList.push({name: "", role: ""});
+        $scope.selectedConfig.hero_priorities.push({name: "", role: ""});
     }
 
     // PRIVATE FUNCTIONS

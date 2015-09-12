@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 
 
+
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
     nick = ndb.StringProperty(required=True)
@@ -58,12 +59,14 @@ class PlayerConfig(ndb.Model):
     player = ndb.KeyProperty(kind=Player)
     name = ndb.StringProperty(default="New config")
     active = ndb.BooleanProperty(default=False)
+    hero_priorities = ndb.JsonProperty()
 
     def get_data(self):
         return {
             'id': self.key.id(),
             'name': self.name,
             'active': self.active,
+            'hero_priorities': self.hero_priorities if self.hero_priorities else []
         }
 
 

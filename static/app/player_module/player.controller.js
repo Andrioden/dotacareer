@@ -34,7 +34,6 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
             then(function(response) {
                 $scope.register_nick = "";
                 $rootScope.player = response.data;
-                console.log(response);
             }, function(response) {
                 AlertError(response);
             });
