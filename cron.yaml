@@ -4,11 +4,16 @@ cron:
   schedule: every 5 mins
 
 
-- description: Job that setup and simulates ranked team games for players that have chosen to participate
-  url: /cron/run_ranked_team_games
-  schedule: every 1 hours from 00:00 to 23:59
-
-
 - description: Job that increases cash for all players
   url: /cron/cash_tick
   schedule: every 5 mins
+
+
+- description: Solo queue match making
+  url: /cron/solo_queue_matchmaking
+  schedule: every 5 mins
+
+
+- description: Job that setup and simulates ranked team games for players that have chosen to participate
+  url: /cron/run_ranked_team_games
+  schedule: every 1 hours from 00:00 to 23:59

@@ -45,7 +45,8 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         $scope.isDoingRelatedAjaxRunning = true;
         $http.post('/api/matches/playAgainstBots').
             then(function(response) {
-                matchWasPlayed(response.data.match);
+                $rootScope.player.matches.push(response.data.match);
+                $rootScope.$broadcast('MatchesControllerEvent_OpenMatchDialog', response.data.match);
                 $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
                 AlertError(response);
@@ -58,7 +59,6 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         $http.post('/api/matches/joinSoloQueue', {type: type}).
             then(function(response) {
                 $rootScope.player.doing = response.data.doing;
-                if (response.data.match) matchWasPlayed(response.data.match);
                 $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
                 AlertError(response);
@@ -84,13 +84,6 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
             templateUrl: 'playerConfigDialog.html',
             controller: 'PlayerConfigDialogController',
         });
-    }
-
-    // PRIVATE FUNCTIONS
-
-    function matchWasPlayed(match) {
-        $rootScope.player.matches.push(match);
-        $rootScope.$broadcast('MatchesControllerEvent_OpenMatchDialog', match);
     }
 
 });
