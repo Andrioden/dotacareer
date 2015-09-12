@@ -79,7 +79,7 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         logging.info(request_data)
         player = current_user_player()
         config = PlayerConfig.get_by_id(int(request_data['id']))
-        updated_hero_priorities = request_data['hero_priorities']
+        updated_hero_priorities = self._hero_priorities_cleaned_for_empty(request_data['hero_priorities'])
 
         # VALIDATION
         if not config.player == player.key:
@@ -95,15 +95,18 @@ class UpdateConfigHandler(webapp2.RequestHandler):
 
         set_json_response(self.response, {'code': "OK"})
 
+    def _hero_priorities_cleaned_for_empty(self, hero_priorities):
+        return [h for h in hero_priorities if (h["name"] or h["role"])]
+
     def _validate_hero_priorities(self, hero_priorities):
         for hero_priority in hero_priorities:
             # VALIDATE HERO NAMES
             if not is_valid_hero_name(hero_priority['name']):
-                error_400(self.response, "ERROR_BAD_HERO_NAME", "Hero name '%s' is not valid. You api-hacking or what?" % hero_priority['name'])
+                error_400(self.response, "ERROR_BAD_HERO_NAME", "Hero name ' %s ' is not valid." % hero_priority['name'])
                 return False
             # VALIDATE ROLES
             if hero_priority['role'] not in ["mid", "support", "carry", "offlane"]:
-                error_400(self.response, "ERROR_BAD_ROLE", "Role '%s' is not valid. You api-hacking or what?" % hero_priority['role'])
+                error_400(self.response, "ERROR_BAD_ROLE", "Role ' %s ' is not valid." % hero_priority['role'])
                 return False
         return True
 

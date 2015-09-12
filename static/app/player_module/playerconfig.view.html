@@ -26,16 +26,17 @@
         <br/>
 
         <!--HERO PRIORITIES-->
-        <label>Hero Priority</label>
+        <label>Hero Priorities</label>
         <form class="form-horizontal">
             <div ng-repeat="heroPriority in selectedConfig.hero_priorities" class="form-group">
+                <div class="col-sm-1">{{$index + 1}}</div>
                 <div class="col-sm-6">
                     <select ng-model="heroPriority.name" class="form-control">
                         <option ng-repeat="hero in heroes | orderBy:'name'" value="{{hero.name}}" ng-selected="heroPriority.name == hero.name">{{hero.name}}</option>
                     </select>
                 </div>
                 <div class="col-sm-1">as</div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <select  ng-model="heroPriority.role" class="form-control">
                         <option  value="mid">Mid</option>
                         <option  value="support">Support</option>
