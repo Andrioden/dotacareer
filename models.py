@@ -73,6 +73,7 @@ class PlayerConfig(ndb.Model):
 class Team(ndb.Model):
     name = ndb.StringProperty(required=True)
     owner = ndb.KeyProperty(kind=Player, required=True)
+    play_ranked = ndb.BooleanProperty(default=False)
 
     def get_data(self, detail_level="simple"):
         data = {

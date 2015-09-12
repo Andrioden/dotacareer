@@ -17,7 +17,10 @@ class EnergyTickHandler(webapp2.RequestHandler):
 
 class RankedTeamGamesHandler(webapp2.RequestHandler):
     def get(self):
-        logging.info('Run ranked team games')
+        teams = Team.query(Team.play_ranked == True)
+        logging.info("Number of teams: %s" % teams.count())
+        # Must implement team play match
+
 
 class CashTickHandler(webapp2.RequestHandler):
     def get(self):
