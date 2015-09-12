@@ -165,7 +165,7 @@ class Match(ndb.Model):
             'id': self.key.id(),
             'winning_faction': self.winning_faction,
             'type': self.type,
-            'date': self.date.strftime("%Y-%m-%d, %H:%M"),
+            # 'date': self.date.strftime("%Y-%m-%d, %H:%M"),
             'date_epoch': int((self.date - datetime(1970, 1, 1)).total_seconds()),
         }
 

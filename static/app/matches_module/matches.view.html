@@ -16,7 +16,7 @@
             <tbody>
             <tr ng-repeat="match in player.matches | orderBy:'-date_epoch'">
                 <td>{{match.id}}</td>
-                <td>{{match.date}}</td>
+                <td>{{match.date_epoch * 1000 | date:'yyyy-MM-dd, HH:mm'}}</td>
                 <td>{{match.type}}</td>
                 <td>{{match.winning_faction}} won</td>
                 <td>
