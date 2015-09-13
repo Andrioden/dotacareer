@@ -49,8 +49,7 @@ class MyHandler(webapp2.RequestHandler):
             return
 
         # RETURN PLAYER
-        user = users.get_current_user()
-        player = Player.query(Player.userid == user.user_id()).get()
+        player = current_user_player()
 
         if player:
             set_json_response(self.response, {'has_player': True, 'player': player.get_data('full')})
@@ -61,7 +60,11 @@ class MyHandler(webapp2.RequestHandler):
 class StopDoingHandler(webapp2.RequestHandler):
     def post(self):
         player = current_user_player()
-        player.clear_doing()
+
+        stop_doing_result = player.stop_doing()
+        if stop_doing_result != True:
+            error_400(self.response, "ERROR_CANT_STOP_DOING", stop_doing_result)
+            return
 
         set_json_response(self.response, {'code': "OK"})
 

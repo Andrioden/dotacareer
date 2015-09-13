@@ -2,7 +2,8 @@ Javascript:
 - Variable and scope variables names: variableName
 - Method name: methodName
 - Class name: ClassName
-- Controllers should use comments to define sections of the code for variables, event listeners, exposed methods and private methods. Se player.controller.js for best practice.
+- Controllers should use comments to define sections of the code for variables, constructor event listeners, exposed methods and private methods. Se player.controller.js for best practice.
+- Post data variables should be underscored: $http.post('/api/..', {match_id: ...}).
 
 Python:
 - We almost strictly follow the very well known PEP8: https://www.python.org/dev/peps/pep-0008/

@@ -9,8 +9,13 @@ cron:
   schedule: every 5 mins
 
 
-- description: Solo queue match making
+- description: Solo queue match making. After matchmaking bets can be placed.
   url: /cron/solo_queue_matchmaking
+  schedule: every 5 mins
+
+
+- description: Finish matches that players have been betting on
+  url: /cron/finish_matches
   schedule: every 5 mins
 
 

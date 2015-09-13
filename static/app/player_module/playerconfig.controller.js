@@ -10,7 +10,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
         then(function(response) {
             $rootScope.heroes = response.data;
         }, function(response) {
-            AlertError(response);
+            alertError(response);
         });
 
     // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
@@ -27,7 +27,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
                 $scope.selectedConfig = response.data;
                 $scope.isCreatingNewConfig = false;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
                 $scope.isCreatingNewConfig = false;
             });
     }
@@ -47,7 +47,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
             then(function(response) {
                 $scope.isDoingConfigAction = false;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
                 $scope.isDoingConfigAction = false;
             });
     }
@@ -61,7 +61,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
                     $scope.selectedConfig = null;
                     $scope.isDoingConfigAction = false;
                 }, function(response) {
-                    AlertError(response);
+                    alertError(response);
                     $scope.isDoingConfigAction = false;
                 });
         }
@@ -75,7 +75,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
                 $scope.selectedConfig.active = true;
                 $scope.isDoingConfigAction = false;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
                 $scope.isDoingConfigAction = false;
             });
     }

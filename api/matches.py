@@ -4,7 +4,7 @@ import webapp2
 import logging
 from utils import *
 from google.appengine.api import users
-from models import MatchSoloQueue, Match
+from models import MatchSoloQueue, Match, MatchPlayer, Bet
 from google.appengine.ext import ndb
 
 
@@ -51,9 +51,50 @@ class PlayAgainstBotsHandler(webapp2.RequestHandler):
             return
 
         bot_match = Match(type="Bot")
-        bot_match.play_bot_match(player)
+        bot_match.setup_bot_match(player)
 
-        set_json_response(self.response, {'match': bot_match.get_data("full")})
+        player.doing = bot_match.key
+        player.put()
+
+        set_json_response(self.response, bot_match.get_data("full"))
+
+
+class BetHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        logging.info(request_data)
+        player = current_user_player()
+
+        match_key = ndb.Key(Match, int(request_data['match_id']))
+        match_player = MatchPlayer.query(MatchPlayer.match == match_key, MatchPlayer.player == player.key).get()
+
+        if not validate_request_data(self.response, request_data, ['match_id', 'bet']):
+            return
+        if not match_player:
+            error_400(self.response, "ERROR_NOT_OWN_GAME", "You have to bet on your own game.")
+            return
+
+        if request_data['bet']['id']:
+            bet = Bet.get_by_id(int(request_data['bet']['id']))
+        else:
+            bet = Bet(match=match_key, player=player.key, winning_faction=match_player.faction)
+
+        new_bet_value = int(request_data['bet']['value'])
+        bet_value_dif = new_bet_value - bet.value
+        if bet_value_dif < 0:
+            error_400(self.response, "ERROR_BET_LOWER", "Your new bet %s is lower than your previous bet %s" % (new_bet_value, bet.value))
+            return
+        if bet_value_dif > player.cash:
+            error_400(self.response, "ERROR_NOT_ENOUGH_CASH", "Not enough cash. Your player has %s cash and your new bet requires %s" % (player.cash, bet_value_dif))
+            return
+
+        bet.value = new_bet_value
+        bet.put()
+
+        player.cash -= bet_value_dif
+        player.put()
+
+        set_json_response(self.response, {'bet': bet.get_data(), 'cash': player.cash})
 
 
 class RESTHandler(webapp2.RequestHandler):
@@ -65,5 +106,6 @@ class RESTHandler(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     (r'/api/matches/playAgainstBots', PlayAgainstBotsHandler),
     (r'/api/matches/joinSoloQueue', JoinSoloQueueHandler),
+    (r'/api/matches/bet', BetHandler),
     (r'/api/matches/rest/(\d+)', RESTHandler),
 ], debug=True)

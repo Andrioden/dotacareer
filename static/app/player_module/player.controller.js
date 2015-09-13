@@ -8,8 +8,18 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         $rootScope.$apply();
     });
 
-    WebSocketService.subscribe("MatchCompleted", function(match){
+    WebSocketService.subscribe("MatchFinished", function(match){
         $rootScope.player.doing = null;
+        $rootScope.$apply();
+    });
+
+    WebSocketService.subscribe("MatchFound", function(match){
+        $rootScope.player.doing = match;
+        $rootScope.$apply();
+    });
+
+    WebSocketService.subscribe("BetWon", function(payout){
+        $rootScope.player.cash += payout;
         $rootScope.$apply();
     });
 
@@ -24,7 +34,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
             }
             $rootScope.loadingPlayer = false;
         }, function(response) {
-            AlertError(response);
+            alertError(response);
             $rootScope.loadingPlayer = false;
         });
 
@@ -35,7 +45,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
                 $scope.register_nick = "";
                 $rootScope.player = response.data;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
             });
     };
 
@@ -45,11 +55,12 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         $scope.isDoingRelatedAjaxRunning = true;
         $http.post('/api/matches/playAgainstBots').
             then(function(response) {
-                $rootScope.player.matches.push(response.data.match);
-                $rootScope.$broadcast('MatchesControllerEvent_OpenMatchDialog', response.data.match);
+                $rootScope.player.doing = response.data;
+                $rootScope.player.matches.push(response.data);
+                $rootScope.$broadcast('MatchesControllerEvent_OpenMatchDialog', response.data);
                 $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
                 $scope.isDoingRelatedAjaxRunning = false;
             });
     }
@@ -61,7 +72,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
                 $rootScope.player.doing = response.data.doing;
                 $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
                 $scope.isDoingRelatedAjaxRunning = false;
             });
     }
@@ -73,7 +84,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
                 $rootScope.player.doing = null;
                 $scope.isDoingRelatedAjaxRunning = false;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
                 $scope.isDoingRelatedAjaxRunning = false;
             });
     }
@@ -85,5 +96,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
             controller: 'PlayerConfigDialogController',
         });
     }
+
+    // PRIVATE METHODS
 
 });

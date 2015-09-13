@@ -1,9 +1,9 @@
 import webapp2
 import logging
-from models import Player, Team, TeamApplication, MatchSoloQueue, Match
+from models import Player, Team, MatchSoloQueue, Match, MatchPlayer, Bet
 from google.appengine.ext import ndb
 from gameconfig import EnergyConfig, CashConfig
-
+from datetime import datetime
 
 class EnergyTickHandler(webapp2.RequestHandler):
     def get(self):
@@ -32,12 +32,27 @@ class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
 
     def _trigger_played_match(self, match_type):
         if MatchSoloQueue.query(MatchSoloQueue.type == match_type).count() >= 2:
-            match_players = [match_queue.player.get() for match_queue in MatchSoloQueue.query(MatchSoloQueue.type == match_type).fetch(10)]
+            match_solo_queues = [match_queue for match_queue in MatchSoloQueue.query(MatchSoloQueue.type == match_type).fetch(10)]
+            players = [match_queue.player.get() for match_queue in match_solo_queues]
             match = Match(type=match_queue.type)
-            match.play_match(match_players)
-            for player in match_players:
-                player.clear_doing()
-                player.websocket_notify("MatchCompleted", match.get_data())
+            match.setup_match(players)
+            ndb.delete_multi([queue.key for queue in match_solo_queues])
+            for player in players:
+                player.doing = match.key
+                player.put()
+                player.websocket_notify("MatchFound", match.get_data())
+
+
+class FinishMatchesHandler(webapp2.RequestHandler):
+    def get(self):
+        for match in Match.query(Match.winning_faction == None, Match.date <= datetime.now()):
+        # for match in Match.query(Match.winning_faction == None):
+            match.play_match()
+            for match_player in MatchPlayer.query(MatchPlayer.match == match.key):
+                player = match_player.player.get()
+                player.doing = None
+                player.put()
+                player.websocket_notify("MatchFinished", match.get_data())
 
 
 class RankedTeamGamesHandler(webapp2.RequestHandler):
@@ -51,6 +66,7 @@ app = webapp2.WSGIApplication([
     (r'/cron/energy_tick', EnergyTickHandler),
     (r'/cron/cash_tick', CashTickHandler),
     (r'/cron/solo_queue_matchmaking', SoloQueueMatchmakingHandler),
+    (r'/cron/finish_matches', FinishMatchesHandler),
     (r'/cron/run_ranked_team_games', RankedTeamGamesHandler),
 
 ], debug=True)

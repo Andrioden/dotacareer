@@ -11,10 +11,15 @@ app.config(['$routeProvider', '$locationProvider',
             });
 
         $locationProvider.html5Mode(true);
-    }]);
+    }
+]);
 
-function AlertError(response) {
+function alertError(response) {
     alert(response.data.message)
+}
+
+function extendObjectWithObject(object1, object2) {
+    for (var attrname in object2) { object1[attrname] = object2[attrname]; }
 }
 
 app.filter('yesNo', function () {

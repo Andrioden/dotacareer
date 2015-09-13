@@ -1,11 +1,11 @@
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 from random import shuffle, randint
-from gameconfig import EnergyConfig, CashConfig
+from gameconfig import EnergyConfig, CashConfig, BettingConfig
 import logging
 from google.appengine.api import channel
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 
@@ -46,10 +46,15 @@ class Player(ndb.Model):
 
         return data
 
-    def clear_doing(self):
-        self.doing.delete()
-        self.doing = None
-        self.put()
+    def stop_doing(self):
+        doing = self.doing.get()
+        if "MatchSoloQueue" in doing.what():
+            self.doing.delete()
+            self.doing = None
+            self.put()
+            return True
+        else:
+            return "Cant stop doing %s" % doing.what()
 
     def websocket_notify(self, event, value):
         channel.send_message(self.userid, json.dumps({'event': event, 'value': value}))
@@ -107,11 +112,17 @@ class MatchSoloQueue(ndb.Model):
     player = ndb.KeyProperty(kind=Player, required=True)
     type = ndb.StringProperty(required=True, choices=['Unranked', 'Ranked'])
 
+    def what(self):
+        """
+        Doing information. Code will be written like this. player.doing.what
+        """
+        return '%sMatchSoloQueue' % self.type
+
     def get_data(self):
         return {
             'id': self.key.id(),
             'type': self.type,
-            'what': '%sMatchSoloQueue' % self.type,
+            'what': self.what(),
             'queued': MatchSoloQueue.query(MatchSoloQueue.type == self.type).count()
         }
 
@@ -124,11 +135,24 @@ class MatchSoloQueue(ndb.Model):
 
 
 class Match(ndb.Model):
-    winning_faction = ndb.StringProperty(required=True, choices=['Dire', 'Radiant'])
     type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked'])
-    date = ndb.DateTimeProperty(auto_now_add=True)
+    date = ndb.DateTimeProperty(required=True)
+    winning_faction = ndb.StringProperty(choices=['Dire', 'Radiant'])
 
-    def play_match(self, players):
+    def state(self):
+        if self.winning_faction:
+            return "finished"
+        else:
+            return "bettable"
+
+    def what(self):
+        """
+        Doing information. Code will be written like this. player.doing.what
+        """
+        return "%sMatch" % self.type
+
+    def setup_match(self, players):
+        self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
         shuffle(players)
         alternated_faction_list = ['Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant']
         self.cached_combatants = []
@@ -138,10 +162,11 @@ class Match(ndb.Model):
                 faction=alternated_faction_list.pop(0)
             ))
 
-        self._simulate_match()
-        self._save_data()
+        self.put()
+        self._put_combatants()
 
-    def play_bot_match(self, player):
+    def setup_bot_match(self, player):
+        self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
         # Add player as combatant
         shuffled_factions_spots = self._get_shuffled_factions_spots()
         self.cached_combatants = []  # Cached so the data can be used without hitting db in get_data method
@@ -157,16 +182,17 @@ class Match(ndb.Model):
                 faction=faction
             ))
 
-        self._simulate_match()
-        self._save_data()
+        self.put()
+        self._put_combatants()
 
     def get_data(self, detail_level="simple"):
         data = {
             'id': self.key.id(),
             'winning_faction': self.winning_faction,
             'type': self.type,
-            # 'date': self.date.strftime("%Y-%m-%d, %H:%M"),
+            'what': self.what(),
             'date_epoch': int((self.date - datetime(1970, 1, 1)).total_seconds()),
+            'state': self.state()
         }
 
         if detail_level == "full":
@@ -175,16 +201,31 @@ class Match(ndb.Model):
             else:
                 match_combatants = MatchCombatant.query(MatchCombatant.match == self.key).fetch()
             data.update({
-                'combatants': [match_combatant.get_data() for match_combatant in match_combatants]
+                'combatants': [match_combatant.get_data() for match_combatant in match_combatants],
+                'bets': [bet.get_data() for bet in Bet.query(Bet.match == self.key)]
             })
 
         return data
 
-    def _simulate_match(self):
+    def play_match(self):
         self.winning_faction = 'Dire' if randint(0, 1) == 0 else 'Radiant'
-
-    def _save_data(self):
         self.put()
+        self._payout_bets()
+
+    def _payout_bets(self):
+        for bet in Bet.query(Bet.match == self.key):
+            if bet.winning_faction == self.winning_faction:
+                player = bet.player.get()
+                payout = bet.value * 2
+                player.cash += payout
+                player.put()
+                bet.payout = payout
+                player.websocket_notify("BetWon", payout)
+            else:
+                bet.payout = 0
+            bet.put()
+
+    def _put_combatants(self):
         for combatant in self.cached_combatants:
             combatant.match = self.key
             combatant.put()
@@ -222,3 +263,20 @@ class MatchBot(MatchCombatant):
         data = self.get_base_data()
         data.update({'nick': self.nick})
         return data
+
+
+class Bet(ndb.Model):
+    match = ndb.KeyProperty(kind=Match, required=True)
+    player = ndb.KeyProperty(kind=Player, required=True)
+    value = ndb.IntegerProperty(default=0)
+    winning_faction = ndb.StringProperty(required=True, choices=['Dire', 'Radiant'])
+    payout = ndb.IntegerProperty()
+
+    def get_data(self):
+        return {
+            'id': self.key.id(),
+            'player': self.player.get().get_data_nick_and_id(),
+            'value': self.value,
+            'winning_faction': self.winning_faction,
+            'payout': self.payout
+        }

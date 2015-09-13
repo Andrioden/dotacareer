@@ -47,7 +47,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
                 deleteApplication(application.id);
                 $rootScope.player.team.members.push(application.player);
             }, function(response) {
-                AlertError(response);
+                alertError(response);
             });
     }
 
@@ -56,7 +56,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
             then(function(response) {
                 deleteApplication(application.id);
             }, function(response) {
-                AlertError(response);
+                alertError(response);
             });
     }
 
@@ -66,7 +66,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
                 then(function(response) {
                     deleteMember(member.id);
                 }, function(response) {
-                    AlertError(response);
+                    alertError(response);
                 });
         }
     }
@@ -78,7 +78,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
                 $rootScope.player.team = response.data.team;
                 console.log(response);
             }, function(response) {
-                AlertError(response);
+                alertError(response);
             });
     }
 
@@ -87,7 +87,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
             then(function(response) {
                 console.log(response)
             }, function(response) {
-                AlertError(response);
+                alertError(response);
             });
     }
 
@@ -125,7 +125,7 @@ app.controller('ApplyTeamDialogController', function ($scope, $modalInstance, $h
         then(function(response) {
             $scope.teams = response.data;
         }, function(response) {
-            AlertError(response);
+            alertError(response);
         });
 
     // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS

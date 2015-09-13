@@ -17,33 +17,70 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
         $scope.openMatchDialog(match);
     });
 
-    WebSocketService.subscribe("MatchCompleted", function(match){
-        $rootScope.player.matches.push(match);
+    WebSocketService.subscribe("MatchFound", function(match){
+        addOrExtendMatch(match);
         $rootScope.$apply();
     });
+
+    WebSocketService.subscribe("MatchFinished", function(match){
+        addOrExtendMatch(match);
+        $rootScope.$apply();
+    });
+
+    // PRIVATE FUNCTIONS
+    function addOrExtendMatch(match) {
+        for(var i=0; i<$rootScope.player.matches.length; i++) {
+            if ($rootScope.player.matches[i].id == match.id) {
+                extendObjectWithObject($rootScope.player.matches[i], match);
+                return;
+            }
+        }
+        $rootScope.player.matches.push(match);
+    }
 
 });
 
 
-app.controller('MatchDialogController', function ($scope, $modalInstance, $http, match) {
+app.controller('MatchDialogController', function ($rootScope, $scope, $modalInstance, $http, match) {
 
     // IMPORTANT CONTROLLER VARIABLES
     $scope.match = match;
+    $scope.bet = null;
+    $scope.currentBetValue = null;
 
     // CONSTRUCTOR
     if (!isMatchDetailed($scope.match)) {
         $http.get('/api/matches/rest/'+match.id).
             then(function(response) {
                 extendObjectWithObject($scope.match, response.data);
+                initiateControllerBetObject();
+                $scope.bet.currentValue = $scope.bet.value;
             }, function(response) {
-                AlertError(response);
+                alertError(response);
             });
     }
+    else initiateControllerBetObject();
 
     // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
-    $scope.cancel = function () {
+    $scope.cancel = function() {
         $modalInstance.dismiss('cancel');
     };
+
+    $scope.isBettingAjaxRunning = false;
+
+    $scope.setBet = function() {
+        $scope.isBettingAjaxRunning = true;
+        $http.post('/api/matches/bet', {match_id: $scope.match.id, bet: $scope.bet}).
+            then(function(response) {
+                extendObjectWithObject($scope.bet, response.data.bet);
+                $scope.bet.currentValue = $scope.bet.value;
+                $rootScope.player.cash = response.data.cash;
+                $scope.isBettingAjaxRunning = false;
+            }, function(response) {
+                alertError(response);
+                $scope.isBettingAjaxRunning = false;
+            });
+    }
 
     // PRIVATE FUNCTIONS
     function isMatchDetailed(match) {
@@ -51,8 +88,15 @@ app.controller('MatchDialogController', function ($scope, $modalInstance, $http,
         else return true;
     }
 
-    function extendObjectWithObject(object1, object2) {
-        for (var attrname in object2) { object1[attrname] = object2[attrname]; }
+    function initiateControllerBetObject() {
+        for(var i=0; i<$scope.match.bets.length; i++) {
+            if ($scope.match.bets[i].player.id == $rootScope.player.id) {
+                $scope.bet = $scope.match.bets[i];
+                return;
+            }
+        }
+        $scope.bet = {id: null, value: 0, currentValue: 0};
+        $scope.match.bets.push($scope.bet);
     }
 
 });

@@ -3,14 +3,7 @@
         <h1>Matches</h1>
     </div>
 
-    <!--<div class="col-xs-12 col-sm-6 col-md-5">-->
-        <!--<h3 class="sub-header">Upcoming</h3>-->
-        <!--<p>No upcoming matches</p>-->
-    <!--</div>-->
-
     <div class="col-xs-12 col-sm-6 col-md-5">
-        <h3 class="sub-header">History</h3>
-
         <div ng-show="!player.matches.length">- No Matches</div>
         <table class="table" ng-show="player.matches.length > 0">
             <tbody>
@@ -18,10 +11,14 @@
                 <td>{{match.id}}</td>
                 <td>{{match.date_epoch * 1000 | date:'yyyy-MM-dd, HH:mm'}}</td>
                 <td>{{match.type}}</td>
-                <td>{{match.winning_faction}} won</td>
+                <td><span ng-show="match.state == 'finished'">{{match.winning_faction}} won</span></td>
+                <td>{{match.state}}</td>
                 <td>
                     <div class="btn-toolbar pull-right">
-                        <button ng-click="openMatchDialog(match)" class="btn btn-primary">Load details</button>
+                        <button ng-click="openMatchDialog(match)" class="btn btn-primary">
+                            <span ng-show="match.state == 'bettable'">Bet</span>
+                            <span ng-show="match.state == 'finished'">Load details</span>
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -36,8 +33,20 @@
         <h3 class="modal-title">{{match.type}} Match</h3>
     </div>
     <div class="modal-body" ng-show="match != null">
-        <div>{{match.winning_faction}} won!</div>
+        <div ng-show="match.winning_faction">{{match.winning_faction}} won!</div>
+        <div ng-show="match.state == 'bettable'" class="input-group">
+            <input ng-model="bet.value" type="range" min="0" max="{{player.cash + bet.currentValue}}" class="form-control">
+            <span class="input-group-btn">
+                <button ng-show="match.winning_faction == null" ng-disabled="isBettingAjaxRunning" ng-click="setBet()" class="btn btn-primary">
+                    Set bet ${{bet.value}}
+                    <span ng-show="bet.currentValue < bet.value">(+{{bet.value - bet.currentValue}})</span>
+                    <span ng-show="bet.currentValue > bet.value">({{bet.value - bet.currentValue}})</span>
+                </button>
+            </span>
+        </div>
+
         <br/>
+        <h3>Players</h3>
         <table class="table">
             <tbody>
             <tr ng-repeat="combatant in match.combatants | orderBy:['faction']">
@@ -46,6 +55,14 @@
             </tr>
             </tbody>
         </table>
+
+        <h3>Bets</h3>
+        <ul>
+            <li ng-show="bet.id" ng-repeat="bet in match.bets">
+                {{bet.player.nick}} bet ${{bet.value}} <span ng-show="bet.payout != null">and won ${{bet.payout}}</span>
+            </li>
+        </ul>
+
     </div>
     <div class="modal-footer">
         <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
