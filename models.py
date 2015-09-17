@@ -161,11 +161,14 @@ class Match(ndb.Model):
         self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
         shuffle(players)
         alternated_faction_list = ['Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant']
+        hero_name_pool = hero_name_pool = [hero['name'] for hero in hero_metrics]
+        random.shuffle(hero_name_pool)
         self.cached_combatants = []
         for player in players:
             self.cached_combatants.append(MatchPlayer(
                 player=player.key,
-                faction=alternated_faction_list.pop(0)
+                faction=alternated_faction_list.pop(0),
+                hero=self._pop_prioritized_hero(player, hero_name_pool)
             ))
 
         self.put()
@@ -174,9 +177,9 @@ class Match(ndb.Model):
     def setup_bot_match(self, player):
         self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
         # Add player as combatant
-        hero_pool = copy.deepcopy(hero_metrics)
+        hero_name_pool = [hero['name'] for hero in hero_metrics]
         player_hero_name = PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).get().hero_priorities[0]['name']
-        hero_pool = [hero for hero in hero_pool if hero['name'] != player_hero_name]
+        hero_name_pool = [hero for hero in hero_name_pool if hero != player_hero_name]
 
         shuffled_factions_spots = self._get_shuffled_factions_spots()
         self.cached_combatants = []  # Cached so the data can be used without hitting db in get_data method
@@ -187,12 +190,12 @@ class Match(ndb.Model):
         ))
 
         # Generate bots
-        random.shuffle(hero_pool)
+        random.shuffle(hero_name_pool)
         for faction in shuffled_factions_spots:
             self.cached_combatants.append(MatchBot(
                 nick="Lolbot",
                 faction=faction,
-                hero=hero_pool.pop()['name']
+                hero=hero_name_pool.pop()
             ))
 
         self.put()
@@ -224,6 +227,19 @@ class Match(ndb.Model):
         self.winning_faction = 'Dire' if randint(0, 1) == 0 else 'Radiant'
         self.put()
         self._payout_bets()
+
+    def _pop_prioritized_hero(self, player, hero_name_pool):
+        active_player_config = PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).get()
+        if active_player_config:
+            for hero_pri in active_player_config.hero_priorities:
+                for hero_name in hero_name_pool:
+                    if hero_pri['name'] == hero_name:
+                        hero_name_pool.remove(hero_name)
+                        return hero_name
+        # No prioritiezed hero available, pick a random
+        return hero_name_pool.pop()
+
+
 
     def _payout_bets(self):
         for bet in Bet.query(Bet.match == self.key):
