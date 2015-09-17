@@ -7,4 +7,4 @@ class CashConfig():
     tickAmount = 5 # Should be underscored
 
 class BettingConfig():
-    betting_window_minutes = 2
+    betting_window_minutes = 0

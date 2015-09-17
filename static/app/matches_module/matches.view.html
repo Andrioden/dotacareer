@@ -52,6 +52,7 @@
             <tr ng-repeat="combatant in match.combatants | orderBy:['faction']">
                 <td>{{combatant.nick}}</td>
                 <td>{{combatant.faction}}</td>
+                <td>{{combatant.hero}}</td>
             </tr>
             </tbody>
         </table>

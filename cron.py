@@ -52,7 +52,7 @@ class FinishMatchesHandler(webapp2.RequestHandler):
                 player = match_player.player.get()
                 player.doing = None
                 player.put()
-                player.websocket_notify("MatchFinished", match.get_data())
+                player.websocket_notify("MatchFinished", match.get_data("full"))
 
 
 class RankedTeamGamesHandler(webapp2.RequestHandler):

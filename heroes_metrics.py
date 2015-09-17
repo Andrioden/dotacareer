@@ -17,8 +17,7 @@ late game
 
 """
 
-
-heroes_metrics = [
+hero_metrics = [
     # MID
     {
         'name': 'Pudge',
@@ -147,8 +146,16 @@ heroes_metrics = [
     },
 ]
 
+
 def is_valid_hero_name(hero_name):
-    for hero in heroes_metrics:
+    for hero in hero_metrics:
         if hero['name'] == hero_name:
             return True
     return False
+
+
+def get_flat_hero_name_list():
+    names = []
+    for hero in hero_metrics:
+        names.append(hero['name'])
+    return names

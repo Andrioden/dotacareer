@@ -2,11 +2,10 @@ from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 from random import shuffle, randint
 from gameconfig import EnergyConfig, CashConfig, BettingConfig
-import logging
+import logging, json, random, copy
 from google.appengine.api import channel
-import json
 from datetime import datetime, timedelta
-
+from heroes_metrics import get_flat_hero_name_list, hero_metrics
 
 
 class Player(ndb.Model):
@@ -64,6 +63,13 @@ class PlayerConfig(ndb.Model):
     player = ndb.KeyProperty(kind=Player)
     name = ndb.StringProperty(default="New config")
     active = ndb.BooleanProperty(default=False)
+    """
+    Hero priorities is a ordered list with dicts in the following format:
+    {
+        'role': string,
+        'name': string
+    }
+    """
     hero_priorities = ndb.JsonProperty()
 
     def get_data(self):
@@ -168,18 +174,25 @@ class Match(ndb.Model):
     def setup_bot_match(self, player):
         self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
         # Add player as combatant
+        hero_pool = copy.deepcopy(hero_metrics)
+        player_hero_name = PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).get().hero_priorities[0]['name']
+        hero_pool = [hero for hero in hero_pool if hero['name'] != player_hero_name]
+
         shuffled_factions_spots = self._get_shuffled_factions_spots()
         self.cached_combatants = []  # Cached so the data can be used without hitting db in get_data method
         self.cached_combatants.append(MatchPlayer(
             player=player.key,
-            faction=shuffled_factions_spots.pop(0)
+            faction=shuffled_factions_spots.pop(0),
+            hero=player_hero_name
         ))
 
         # Generate bots
-        for faction in self._get_shuffled_factions_spots():
+        random.shuffle(hero_pool)
+        for faction in shuffled_factions_spots:
             self.cached_combatants.append(MatchBot(
                 nick="Lolbot",
-                faction=faction
+                faction=faction,
+                hero=hero_pool.pop()['name']
             ))
 
         self.put()
@@ -239,11 +252,13 @@ class Match(ndb.Model):
 class MatchCombatant(polymodel.PolyModel):
     match = ndb.KeyProperty(kind=Match, required=True)
     faction = ndb.StringProperty(required=True, choices=['Dire', 'Radiant'])
+    hero = ndb.StringProperty(required=True, choices=get_flat_hero_name_list())
 
     def get_base_data(self):
         return {
             'id': self.key.id(),
-            'faction': self.faction
+            'faction': self.faction,
+            'hero': self.hero,
         }
 
 
