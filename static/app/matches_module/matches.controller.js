@@ -90,7 +90,11 @@ app.controller('MatchDialogController', function ($rootScope, $scope, $modalInst
 
     function initiateControllerBetObject() {
         for(var i=0; i<$scope.match.bets.length; i++) {
-            if ($scope.match.bets[i].player.id == $rootScope.player.id) {
+            if ($scope.match.bets[i].id == null) {
+                $scope.bet = $scope.match.bets[i];
+                return;
+            }
+            else if ($scope.match.bets[i].player.id == $rootScope.player.id) {
                 $scope.bet = $scope.match.bets[i];
                 return;
             }
