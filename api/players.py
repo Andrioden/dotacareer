@@ -72,7 +72,8 @@ class StopDoingHandler(webapp2.RequestHandler):
 class NewConfigHandler(webapp2.RequestHandler):
     def post(self):
         player = current_user_player()
-        new_config = PlayerConfig(player=player.key).put().get()
+        first_config = PlayerConfig.query(PlayerConfig.player == player.key).count() == 0
+        new_config = PlayerConfig(player=player.key, active=first_config).put().get()
         set_json_response(self.response, new_config.get_data())
 
 
