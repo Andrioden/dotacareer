@@ -45,6 +45,9 @@ class Player(ndb.Model):
 
         return data
 
+    def get_active_player_config(self):
+        return PlayerConfig.query(PlayerConfig.player == self.key, PlayerConfig.active == True).get()
+
     def stop_doing(self):
         doing = self.doing.get()
         if "MatchSoloQueue" in doing.what():
@@ -178,15 +181,14 @@ class Match(ndb.Model):
         self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
         # Add player as combatant
         hero_name_pool = [hero['name'] for hero in hero_metrics]
-        player_hero_name = PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).get().hero_priorities[0]['name']
-        hero_name_pool = [hero for hero in hero_name_pool if hero != player_hero_name]
+        random.shuffle(hero_name_pool)
 
         shuffled_factions_spots = self._get_shuffled_factions_spots()
         self.cached_combatants = []  # Cached so the data can be used without hitting db in get_data method
         self.cached_combatants.append(MatchPlayer(
             player=player.key,
             faction=shuffled_factions_spots.pop(0),
-            hero=player_hero_name
+            hero=self._pop_prioritized_hero(player, hero_name_pool)
         ))
 
         # Generate bots

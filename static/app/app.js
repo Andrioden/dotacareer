@@ -3,11 +3,11 @@ var app = angular.module('DOTACareer', ['ngRoute', 'ui.bootstrap']);
 app.config(['$routeProvider', '$locationProvider',
     function ($routeProvider, $locationProvider) {
         $routeProvider.
-            when('/home', {
+            when('/', {
                 templateUrl: 'static/app/home/home.view.html'
             })
             .otherwise({
-                redirectTo: '/home'
+                redirectTo: '/'
             });
 
         $locationProvider.html5Mode(true);

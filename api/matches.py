@@ -66,8 +66,12 @@ class BetHandler(webapp2.RequestHandler):
         player = current_user_player()
 
         match_key = ndb.Key(Match, int(request_data['match_id']))
+        match = match_key.get()
         match_player = MatchPlayer.query(MatchPlayer.match == match_key, MatchPlayer.player == player.key).get()
 
+        if match.state() == "finished":
+            error_400(self.response, "ERROR_FINISHED_GAME", "You can not bet on a finished game.")
+            return
         if not validate_request_data(self.response, request_data, ['match_id', 'bet']):
             return
         if not match_player:
