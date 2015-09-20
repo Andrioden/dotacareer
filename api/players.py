@@ -29,7 +29,7 @@ class RegisterHandler(webapp2.RequestHandler):
         new_player = Player(
             userid=user.user_id(),
             nick=request_data['nick'],
-            skill=10000
+            skill=10.0
         ).put().get()
 
         set_json_response(self.response, new_player.get_data())

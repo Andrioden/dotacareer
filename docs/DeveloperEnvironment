@@ -1,0 +1,8 @@
+-- IN RAW FORMAT --
+
+1. Download python
+2. Download Google SDK
+3. Download PyCharm
+4. Configure PyCharm
+    4.1 Include google python project
+    4.2 ignore it https://www.jetbrains.com/pycharm/help/configuring-folders-within-a-content-root.html

@@ -1,18 +1,19 @@
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
-from random import shuffle, randint
+import random
 from gameconfig import EnergyConfig, CashConfig, BettingConfig
 import logging, json, random, copy
 from google.appengine.api import channel
 from datetime import datetime, timedelta
 from heroes_metrics import get_flat_hero_name_list, hero_metrics
-
+from simulator.factories import MatchSimulatorFactory
+from simulator.matchsimulator import MatchSimulator # Imported so autocomplete works
 
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
     nick = ndb.StringProperty(required=True)
     nick_lower = ndb.ComputedProperty(lambda self: self.nick.lower())
-    skill = ndb.IntegerProperty(required=True)
+    skill = ndb.FloatProperty(required=True)
     team = ndb.KeyProperty(kind='Team')
     doing = ndb.KeyProperty(default=None)
     energy = ndb.IntegerProperty(default=EnergyConfig.maxEnergy)
@@ -28,7 +29,7 @@ class Player(ndb.Model):
         data = {
             'id': self.key.id(),
             'nick': self.nick,
-            'skill': int(self.skill / 1000.0),
+            'skill': int(self.skill),
             'team': self.team.get().get_data(detail_level) if self.team else None,
             'doing': self.doing.get().get_data() if self.doing else None,
             'energy': self.energy,
@@ -147,6 +148,7 @@ class Match(ndb.Model):
     type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked'])
     date = ndb.DateTimeProperty(required=True)
     winning_faction = ndb.StringProperty(choices=['Dire', 'Radiant'])
+    logs = ndb.JsonProperty()
 
     def state(self):
         if self.winning_faction:
@@ -162,7 +164,7 @@ class Match(ndb.Model):
 
     def setup_match(self, players):
         self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
-        shuffle(players)
+        random.shuffle(players)
         alternated_faction_list = ['Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant']
         hero_name_pool = hero_name_pool = [hero['name'] for hero in hero_metrics]
         random.shuffle(hero_name_pool)
@@ -220,13 +222,30 @@ class Match(ndb.Model):
                 match_combatants = MatchCombatant.query(MatchCombatant.match == self.key).fetch()
             data.update({
                 'combatants': [match_combatant.get_data() for match_combatant in match_combatants],
-                'bets': [bet.get_data() for bet in Bet.query(Bet.match == self.key)]
+                'bets': [bet.get_data() for bet in Bet.query(Bet.match == self.key)],
+                'logs': self.logs
             })
 
         return data
 
     def play_match(self):
-        self.winning_faction = 'Dire' if randint(0, 1) == 0 else 'Radiant'
+        simulator = MatchSimulatorFactory().create(MatchCombatant.query(MatchCombatant.match == self.key).fetch())
+        simulator.run()
+        logging.info(simulator.get_printable_log())
+
+        self.winning_faction = simulator.winning_faction
+        self.logs = simulator.logs
+
+        for sim_player in (simulator.dire + simulator.radiant):
+            if sim_player.db_combatant:
+                sim_player.db_combatant.stat_outcomes = sim_player.stat_outcomes
+                for stat_outcome in sim_player.stat_outcomes:
+                    current_stat_value = getattr(sim_player.db_player, stat_outcome['stat'])
+                    new_stat_value = current_stat_value + stat_outcome['outcome']
+                    setattr(sim_player.db_player, stat_outcome['stat'], new_stat_value)
+                sim_player.db_combatant.put()
+                sim_player.db_player.put()
+
         self.put()
         self._payout_bets()
 
@@ -238,10 +257,8 @@ class Match(ndb.Model):
                     if hero_pri['name'] == hero_name:
                         hero_name_pool.remove(hero_name)
                         return hero_name
-        # No prioritiezed hero available, pick a random
+        # No prioritized hero available, pick a random
         return hero_name_pool.pop()
-
-
 
     def _payout_bets(self):
         for bet in Bet.query(Bet.match == self.key):
@@ -263,7 +280,7 @@ class Match(ndb.Model):
 
     def _get_shuffled_factions_spots(self):
         faction_spots = ['Dire', 'Dire', 'Dire', 'Dire', 'Dire', 'Radiant', 'Radiant', 'Radiant', 'Radiant', 'Radiant']
-        shuffle(faction_spots)
+        random.shuffle(faction_spots)
         return faction_spots
 
 
@@ -271,6 +288,14 @@ class MatchCombatant(polymodel.PolyModel):
     match = ndb.KeyProperty(kind=Match, required=True)
     faction = ndb.StringProperty(required=True, choices=['Dire', 'Radiant'])
     hero = ndb.StringProperty(required=True, choices=get_flat_hero_name_list())
+    """
+    stat_outcomes is a list in the following format:
+    {
+        'stat' string, # the variable name on the player/playerstat object
+        'outcome: float, # the outcome/change of the stat value
+    }
+    """
+    stat_outcomes = ndb.JsonProperty()
 
     def get_base_data(self):
         return {
