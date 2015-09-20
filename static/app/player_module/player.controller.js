@@ -18,7 +18,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         $rootScope.$apply();
     });
 
-    WebSocketService.subscribe("BetWon", function(payout){
+    WebSocketService.subscribe("CashChange", function(payout){
         $rootScope.player.cash += payout;
         $rootScope.$apply();
     });

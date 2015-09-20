@@ -251,7 +251,7 @@ class Match(ndb.Model):
                 player.cash += payout
                 player.put()
                 bet.payout = payout
-                player.websocket_notify("BetWon", payout)
+                player.websocket_notify("CashChange", payout)
             else:
                 bet.payout = 0
             bet.put()

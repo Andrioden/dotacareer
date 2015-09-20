@@ -23,6 +23,7 @@ class CashTickHandler(webapp2.RequestHandler):
         for player in players:
             player.cash += CashConfig.tickAmount
             player.put()
+            player.websocket_notify("CashChange", CashConfig.tickAmount)
 
 
 class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
@@ -46,7 +47,6 @@ class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
 class FinishMatchesHandler(webapp2.RequestHandler):
     def get(self):
         for match in Match.query(Match.winning_faction == None, Match.date <= datetime.now()):
-        # for match in Match.query(Match.winning_faction == None):
             match.play_match()
             for match_player in MatchPlayer.query(MatchPlayer.match == match.key):
                 player = match_player.player.get()
@@ -68,5 +68,4 @@ app = webapp2.WSGIApplication([
     (r'/cron/solo_queue_matchmaking', SoloQueueMatchmakingHandler),
     (r'/cron/finish_matches', FinishMatchesHandler),
     (r'/cron/run_ranked_team_games', RankedTeamGamesHandler),
-
 ], debug=True)
