@@ -1,4 +1,4 @@
-var app = angular.module('DOTACareer', ['ngRoute', 'ui.bootstrap']);
+var app = angular.module('DOTACareer', ['ngRoute', 'ui.bootstrap', 'rzModule']);
 
 app.config(['$routeProvider', '$locationProvider',
     function ($routeProvider, $locationProvider) {

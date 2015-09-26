@@ -23,7 +23,7 @@ hero_metrics = [
         'name': 'Pudge',
         'potentials':  {
             'mid': 75,
-            'off_lane': 25,
+            'offlane': 25,
             'support': 25,
             'carry': 0,
             'farm': 25,
@@ -35,7 +35,7 @@ hero_metrics = [
         'name': 'Anti-Mage',
         'potentials': {
             'mid': 25,
-            'off_lane': 50,
+            'offlane': 50,
             'support': 0,
             'carry': 100,
             'farm': 100,
@@ -47,7 +47,7 @@ hero_metrics = [
         'name': 'Shadow Fiend',
         'potentials': {
             'mid': 75,
-            'off_lane': 0,
+            'offlane': 0,
             'support': 0,
             'carry': 50,
             'farm': 100,
@@ -60,7 +60,7 @@ hero_metrics = [
         'name': 'Techies',
         'potentials': {
             'mid': 25,
-            'off_lane': 25,
+            'offlane': 25,
             'support': 75,
             'carry': 0,
             'farm': 50,
@@ -72,7 +72,7 @@ hero_metrics = [
         'name': 'Tidehunter',
         'potentials': {
             'mid': 25,
-            'off_lane': 100,
+            'offlane': 100,
             'support': 25,
             'carry': 25,
             'farm': 25,
@@ -85,7 +85,7 @@ hero_metrics = [
         'name': 'Clockwerk',
         'potentials': {
             'mid': 50,
-            'off_lane': 100,
+            'offlane': 100,
             'support': 25,
             'carry': 0,
             'farm': 25,
@@ -98,7 +98,7 @@ hero_metrics = [
         'name': 'Tusk',
         'potentials': {
             'mid': 50,
-            'off_lane': 50,
+            'offlane': 50,
             'support': 50,
             'carry': 25,
             'farm': 25,
@@ -110,7 +110,7 @@ hero_metrics = [
         'name': 'Crystal Maiden',
         'potentials': {
             'mid': 25,
-            'off_lane': 0,
+            'offlane': 0,
             'support': 100,
             'carry': 0,
             'farm': 50,
@@ -123,7 +123,7 @@ hero_metrics = [
         'name': 'Lion',
         'potentials': {
             'mid': 50,
-            'off_lane': 0,
+            'offlane': 0,
             'support': 100,
             'carry': 0,
             'farm': 25,
@@ -136,7 +136,7 @@ hero_metrics = [
         'name': 'Omniknight',
         'potentials': {
             'mid': 25,
-            'off_lane': 50,
+            'offlane': 50,
             'support': 100,
             'carry': 25,
             'farm': 25,

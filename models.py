@@ -4,10 +4,11 @@ import random
 from gameconfig import EnergyConfig, CashConfig, BettingConfig
 import logging, json, random, copy
 from google.appengine.api import channel
-from datetime import datetime, timedelta
+import datetime
 from heroes_metrics import get_flat_hero_name_list, hero_metrics
 from simulator.factories import MatchSimulatorFactory
 from simulator.matchsimulator import MatchSimulator # Imported so autocomplete works
+
 
 class Player(ndb.Model):
     userid = ndb.StringProperty(required=True)
@@ -88,7 +89,9 @@ class PlayerConfig(ndb.Model):
 class Team(ndb.Model):
     name = ndb.StringProperty(required=True)
     owner = ndb.KeyProperty(kind=Player, required=True)
-    play_ranked = ndb.BooleanProperty(default=False)
+    ranked_last_match = ndb.DateTimeProperty(default=datetime.datetime.now())
+    ranked_start_hour = ndb.IntegerProperty() # Is influenced by local time, so its not 0-24, it can be negative number
+    ranked_end_hour = ndb.IntegerProperty() # Is influenced by local time, so its not 0-24, it can be negative number
 
     def get_data(self, detail_level="simple"):
         data = {
@@ -98,6 +101,10 @@ class Team(ndb.Model):
         }
         if detail_level == "full":
             data.update({
+                'ranked_time': {
+                    'start_hour': self.ranked_start_hour,
+                    'end_hour': self.ranked_end_hour,
+                },
                 'applications': [team_app.get_data() for team_app in TeamApplication.query(TeamApplication.team == self.key)],
                 'members': [player.get_data_nick_and_id() for player in Player.query(Player.team == self.key)]
             })
@@ -144,8 +151,8 @@ class MatchSoloQueue(ndb.Model):
             match_queue_left.player.get().websocket_notify("NewPlayerDoingQueueCount", match_queues_after_deletion_count)
 
 
-class Match(ndb.Model):
-    type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked'])
+class Match(polymodel.PolyModel):
+    type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked', 'TeamRanked'])
     date = ndb.DateTimeProperty(required=True)
     winning_faction = ndb.StringProperty(choices=['Dire', 'Radiant'])
     logs = ndb.JsonProperty()
@@ -162,11 +169,34 @@ class Match(ndb.Model):
         """
         return "%sMatch" % self.type
 
-    def setup_match(self, players):
-        self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
+    def get_data(self, detail_level="simple"):
+        data = {
+            'id': self.key.id(),
+            'winning_faction': self.winning_faction,
+            'type': self.type,
+            'what': self.what(),
+            'date_epoch': int((self.date - datetime.datetime(1970, 1, 1)).total_seconds()),
+            'state': self.state()
+        }
+
+        if detail_level == "full":
+            if hasattr(self, "cached_combatants"):
+                match_combatants = self.cached_combatants
+            else:
+                match_combatants = MatchCombatant.query(MatchCombatant.match == self.key).fetch()
+            data.update({
+                'combatants': [match_combatant.get_data() for match_combatant in match_combatants],
+                'bets': [bet.get_data() for bet in Bet.query(Bet.match == self.key)],
+                'logs': self.logs
+            })
+
+        return data
+
+    def setup_soloqueue_match(self, players):
+        self.date = datetime.datetime.now() + datetime.timedelta(minutes=BettingConfig.betting_window_minutes)
         random.shuffle(players)
         alternated_faction_list = ['Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant', 'Dire', 'Radiant']
-        hero_name_pool = hero_name_pool = [hero['name'] for hero in hero_metrics]
+        hero_name_pool = [hero['name'] for hero in hero_metrics]
         random.shuffle(hero_name_pool)
         self.cached_combatants = []
         for player in players:
@@ -180,7 +210,7 @@ class Match(ndb.Model):
         self._put_combatants()
 
     def setup_bot_match(self, player):
-        self.date = datetime.now() + timedelta(minutes=BettingConfig.betting_window_minutes)
+        self.date = datetime.datetime.now() + datetime.timedelta(minutes=BettingConfig.betting_window_minutes)
         # Add player as combatant
         hero_name_pool = [hero['name'] for hero in hero_metrics]
         random.shuffle(hero_name_pool)
@@ -205,29 +235,6 @@ class Match(ndb.Model):
         self.put()
         self._put_combatants()
 
-    def get_data(self, detail_level="simple"):
-        data = {
-            'id': self.key.id(),
-            'winning_faction': self.winning_faction,
-            'type': self.type,
-            'what': self.what(),
-            'date_epoch': int((self.date - datetime(1970, 1, 1)).total_seconds()),
-            'state': self.state()
-        }
-
-        if detail_level == "full":
-            if hasattr(self, "cached_combatants"):
-                match_combatants = self.cached_combatants
-            else:
-                match_combatants = MatchCombatant.query(MatchCombatant.match == self.key).fetch()
-            data.update({
-                'combatants': [match_combatant.get_data() for match_combatant in match_combatants],
-                'bets': [bet.get_data() for bet in Bet.query(Bet.match == self.key)],
-                'logs': self.logs
-            })
-
-        return data
-
     def play_match(self):
         simulator = MatchSimulatorFactory().create(MatchCombatant.query(MatchCombatant.match == self.key).fetch())
         simulator.run()
@@ -251,7 +258,7 @@ class Match(ndb.Model):
 
     def _pop_prioritized_hero(self, player, hero_name_pool):
         active_player_config = PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).get()
-        if active_player_config:
+        if active_player_config and active_player_config.hero_priorities:
             for hero_pri in active_player_config.hero_priorities:
                 for hero_name in hero_name_pool:
                     if hero_pri['name'] == hero_name:
@@ -282,6 +289,55 @@ class Match(ndb.Model):
         faction_spots = ['Dire', 'Dire', 'Dire', 'Dire', 'Dire', 'Radiant', 'Radiant', 'Radiant', 'Radiant', 'Radiant']
         random.shuffle(faction_spots)
         return faction_spots
+
+
+class TeamMatch(Match):
+    dire = ndb.KeyProperty(kind=Team, required=True)
+    radiant = ndb.KeyProperty(kind=Team, required=True)
+
+    def setup_team_match(self, teams):
+        self.date = datetime.datetime.now() + datetime.timedelta(minutes=BettingConfig.betting_window_minutes)
+
+        random.shuffle(teams)
+        dire = teams.pop()
+        radiant = teams.pop()
+
+        dire_players = Player.query(Player.team == dire.key, Player.doing == None).fetch()
+        radiant_players = Player.query(Player.team == radiant.key, Player.doing == None).fetch()
+
+        if len(dire_players) == 0 or len(radiant_players) == 0:
+            raise Exception("0 dire or radiant players, this should rarely happen. Well, maybe. dire: %s radiant: %s" % (len(dire_players), len(radiant_players)))
+
+        if random.randint(0,1) == 1:
+            picking_order = ["Dire", "Radiant", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire"]
+        else:
+            picking_order = ["Radiant", "Dire", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant"]
+
+        hero_name_pool = [hero['name'] for hero in hero_metrics]
+        players = []
+        self.cached_combatants = []
+        for faction in picking_order:
+            picking_faction_player_list = dire_players if faction == "Dire" else radiant_players
+            if len(picking_faction_player_list) == 0:
+                continue
+            player = picking_faction_player_list.pop()
+
+            players.append(player)
+            self.cached_combatants.append(MatchPlayer(
+                player=player.key,
+                faction=faction,
+                hero=self._pop_prioritized_hero(player, hero_name_pool)
+            ))
+
+        dire.ranked_last_match = datetime.datetime.now()
+        dire.put()
+        radiant.ranked_last_match = datetime.datetime.now()
+        radiant.put()
+        self.dire = dire.key
+        self.radiant = radiant.key
+        self.put()
+        self._put_combatants()
+        return players
 
 
 class MatchCombatant(polymodel.PolyModel):

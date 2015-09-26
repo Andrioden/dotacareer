@@ -2,6 +2,7 @@
 
 import webapp2
 import logging
+import datetime
 from utils import *
 from models import Player, Team, TeamApplication
 from google.appengine.ext import ndb
@@ -32,7 +33,7 @@ class RegisterHandler(webapp2.RequestHandler):
         player.put()
 
         ndb.get_context().clear_cache() # Required to get the new player as part of the get_data
-        set_json_response(self.response, {'team': new_team.get_data('full'), 'player': player.get_data()})
+        set_json_response(self.response, {'team': new_team.get_data('full')})
 
 
 class TeamsHandler(webapp2.RequestHandler):
@@ -128,6 +129,23 @@ class KickMemberHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
+class UpdateConfigHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        player = current_user_player()
+        team = player.team.get()
+
+        # VALIDATIONS
+        if not _validate_is_team_owner(self.response, player, team):
+            return
+
+        # DO SHIT
+        team.ranked_start_hour = int(request_data['ranked_start_hour'])
+        team.ranked_end_hour = int(request_data['ranked_end_hour'])
+        team.put()
+
+        set_json_response(self.response, {'code': "OK"})
+
 def _validate_has_no_team(response, player):
     if player.team:
         error_400(response, "ERROR_HAS_TEAM", "Your player can only be part of 1 team.")
@@ -151,4 +169,5 @@ app = webapp2.WSGIApplication([
     (r'/api/teams/acceptApplication', AcceptApplicationHandler),
     (r'/api/teams/declineApplication', DeclineApplicationHandler),
     (r'/api/teams/kickMember', KickMemberHandler),
+    (r'/api/teams/updateConfig', UpdateConfigHandler)
 ], debug=True)

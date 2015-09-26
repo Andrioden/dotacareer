@@ -6,3 +6,4 @@
 4. Configure PyCharm
     4.1 Include google python project
     4.2 ignore it https://www.jetbrains.com/pycharm/help/configuring-folders-within-a-content-root.html
+    4.3 Turn off Show Inherited in Stucture view

@@ -18,7 +18,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
         modalInstance.result.then(
             // Dialog successfully closed
             function (team_name) {
-               createTeam(team_name);
+               registerTeam(team_name);
             // Canceled
             }, function () {}
         );
@@ -71,12 +71,19 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
         }
     }
 
+    $scope.openTeamConfigDialog = function() {
+        var modalInstance = $modal.open({
+            animation: true,
+            templateUrl: 'teamConfigDialog.html',
+            controller: 'TeamConfigDialogController',
+        });
+    }
+
     // INTERNAL FUNCTIONS
-    function createTeam(team_name) {
+    function registerTeam(team_name) {
         $http.post('/api/teams/register', {team_name: team_name}).
             then(function(response) {
                 $rootScope.player.team = response.data.team;
-                console.log(response);
             }, function(response) {
                 alertError(response);
             });
