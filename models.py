@@ -155,7 +155,7 @@ class Match(polymodel.PolyModel):
     type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked', 'TeamRanked'])
     date = ndb.DateTimeProperty(required=True)
     winning_faction = ndb.StringProperty(choices=['Dire', 'Radiant'])
-    logs = ndb.JsonProperty()
+    logs = ndb.StringProperty(repeated=True)
 
     def state(self):
         if self.winning_faction:
@@ -241,7 +241,7 @@ class Match(polymodel.PolyModel):
         logging.info(simulator.get_printable_log())
 
         self.winning_faction = simulator.winning_faction
-        self.logs = simulator.logs
+        self.logs.extend(simulator.logs)
 
         for sim_player in (simulator.dire + simulator.radiant):
             if sim_player.db_combatant:
@@ -308,12 +308,16 @@ class TeamMatch(Match):
         if len(dire_players) == 0 or len(radiant_players) == 0:
             raise Exception("0 dire or radiant players, this should rarely happen. Well, maybe. dire: %s radiant: %s" % (len(dire_players), len(radiant_players)))
 
+        self.logs.append("--- Picking phase ---")
         if random.randint(0,1) == 1:
             picking_order = ["Dire", "Radiant", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire"]
+            self.logs.append("Dire won coin flip and picks first")
         else:
             picking_order = ["Radiant", "Dire", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant"]
+            self.logs.append("Dire won coin flip and picks first")
 
         hero_name_pool = [hero['name'] for hero in hero_metrics]
+        random.shuffle(hero_name_pool)
         players = []
         self.cached_combatants = []
         for faction in picking_order:
@@ -323,12 +327,16 @@ class TeamMatch(Match):
             player = picking_faction_player_list.pop()
 
             players.append(player)
+
+            picked_hero = self._pop_prioritized_hero(player, hero_name_pool)
+            self.logs.append("%s picked %s for %s" % (faction, picked_hero, player.nick))
             self.cached_combatants.append(MatchPlayer(
                 player=player.key,
                 faction=faction,
-                hero=self._pop_prioritized_hero(player, hero_name_pool)
+                hero=picked_hero
             ))
 
+        # SAVE
         dire.ranked_last_match = datetime.datetime.now()
         dire.put()
         radiant.ranked_last_match = datetime.datetime.now()

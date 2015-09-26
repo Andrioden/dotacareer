@@ -17,6 +17,7 @@ class MatchSimulator:
         self.logs = []
 
     def run(self):
+        self._log("--- Match phase ---")
         self._log("Running simulator of dire (%s players) vs radiant (%s players)" % (len(self.dire), len(self.radiant)))
         self.winning_faction = 'Dire' if random.randint(0, 1) == 0 else 'Radiant'
         self._set_stat_outcomes()

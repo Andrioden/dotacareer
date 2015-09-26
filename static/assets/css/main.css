@@ -47,3 +47,7 @@ h1 {
 .table>tbody>tr>td>div>button{
     line-height: .6;
 }
+
+*[popover] {
+    color: white;
+}

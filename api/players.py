@@ -32,7 +32,7 @@ class RegisterHandler(webapp2.RequestHandler):
             skill=10.0
         ).put().get()
 
-        set_json_response(self.response, new_player.get_data("full"))
+        set_json_response(self.response, new_player.get_data(""))
 
     def _validate_has_not_player_already(self, user):
         if Player.query(Player.userid == user.user_id()).count() > 0:
