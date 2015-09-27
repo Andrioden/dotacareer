@@ -8,6 +8,13 @@
     background-image: url("../images/view_bg_texture.png");
 }
 
+.row-eq-height {
+ display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display:         flex;
+}
+
 .btn-toolbar.margin-vertical {
     margin-top: 10px;
     margin-bottom: 10px;
@@ -46,4 +53,47 @@ h1 {
 
 .table>tbody>tr>td>div>button{
     line-height: .6;
+}
+
+.player_class_box
+{
+    border: 1px solid #161616;
+    background-color: #272727;
+    border-radius: 5px;
+    padding: 10px 10px;
+    margin: 10px;
+    height: 100%;
+}
+
+.player_class_box .name{
+    color: #c33d2b;
+}
+
+.player_class_box:hover
+{
+    cursor: pointer;
+}
+
+.player_class_box-active{
+    background-color: #373737;
+}
+
+.stat_list
+{
+
+}
+
+.stat_list .stat_name
+{
+    color: #c29700;
+}
+
+.stat_list .stat_value
+{
+    text-align: right;
+}
+
+.error
+{
+    color: red;
 }

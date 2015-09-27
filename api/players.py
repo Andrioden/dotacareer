@@ -7,6 +7,8 @@ from utils import *
 from models import Player, PlayerConfig
 from google.appengine.api import users
 from heroes_metrics import is_valid_hero_name
+from player_class_metrics import player_class_metrics, is_valid_player_class_name
+
 
 class RegisterHandler(webapp2.RequestHandler):
     def post(self):
@@ -15,7 +17,7 @@ class RegisterHandler(webapp2.RequestHandler):
         user = users.get_current_user()
 
         # VALIDATION
-        if not validate_request_data(self.response, request_data, ['nick']):
+        if not validate_request_data(self.response, request_data, ['nick', 'player_class']):
             return
         if not validate_logged_inn(self.response):
             return
@@ -24,14 +26,26 @@ class RegisterHandler(webapp2.RequestHandler):
         if Player.query(Player.nick_lower == request_data['nick'].lower()).count() > 0:
             error_400(self.response, "ERROR_NICK_TAKEN", "The nickname %s is already taken" % request_data['nick'])
             return
+        if not is_valid_player_class_name(request_data['player_class']):
+            error_400(self.response, "ERROR_BAD_PLAYER_CLASS", "Player class ' %s ' is not valid." % request_data['player_class'])
+            return
 
         # REGISTER PLAYER
         new_player = Player(
             userid=user.user_id(),
             nick=request_data['nick'],
             skill=10.0
-        ).put().get()
+        )
 
+        for player_class in player_class_metrics:
+            if player_class['name'] == request_data['player_class']:
+                logging.info(player_class['stat_modifiers'])
+                for stat_name, stat_value in player_class['stat_modifiers'].iteritems():
+                    current_stat_value = getattr(new_player, stat_name)
+                    new_stat_value = current_stat_value + stat_value
+                    setattr(new_player, stat_name, new_stat_value)
+
+        new_player.put().get()
         set_json_response(self.response, new_player.get_data("full"))
 
     def _validate_has_not_player_already(self, user):
@@ -54,7 +68,8 @@ class MyHandler(webapp2.RequestHandler):
         if player:
             set_json_response(self.response, {'has_player': True, 'player': player.get_data('full')})
         else:
-            set_json_response(self.response, {'has_player': False})
+            register_player_form_data = {'player_classes': player_class_metrics}
+            set_json_response(self.response, {'has_player': False, 'register_player_form_data': register_player_form_data})
 
 
 class StopDoingHandler(webapp2.RequestHandler):
@@ -154,6 +169,7 @@ class SetActiveConfigHandler(webapp2.RequestHandler):
         config.put()
 
         set_json_response(self.response, {'code': "OK"})
+
 
 app = webapp2.WSGIApplication([
     (r'/api/players/register', RegisterHandler),

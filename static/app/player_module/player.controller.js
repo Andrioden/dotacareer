@@ -33,6 +33,7 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
                 GLOBAL_VAR_LOL = $rootScope.player
             }
             $rootScope.loadingPlayer = false;
+            $rootScope.register_player_form_data = response.data.register_player_form_data
         }, function(response) {
             alertError(response);
             $rootScope.loadingPlayer = false;
@@ -40,13 +41,22 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
 
     // EXPOSED ACTIONS FOR HTML
     $scope.submitPlayer = function() {
-        $http.post('/api/players/register', {nick: $scope.register_nick}).
+        if($scope.selectedPlayerClass == null)
+        {
+            $scope.selectedPlayerClassError = "Mandatory";
+            return;
+        }
+
+        $http.post('/api/players/register', {nick: $scope.register_nick, player_class: $scope.selectedPlayerClass}).
             then(function(response) {
-                $scope.register_nick = "";
                 $rootScope.player = response.data;
             }, function(response) {
                 alertError(response);
             });
+    };
+
+    $scope.setSelectedPlayerClass = function(selectedPlayerClass) {
+        $scope.selectedPlayerClass = selectedPlayerClass;
     };
 
     $scope.isDoingRelatedAjaxRunning = false;

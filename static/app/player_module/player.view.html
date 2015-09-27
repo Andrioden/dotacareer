@@ -1,5 +1,5 @@
 <div id="playerView" class="row view" ng-controller="PlayerController as playerController">
-    <div class="col-xs-12 col-sm-6 col-md-5">
+    <div class="col-xs-12 col-sm-12 col-md-12">
         <div ng-show="player == null && !loadingPlayer" ng-cloak>
             <h1>Register player</h1>
 
@@ -7,8 +7,31 @@
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="nickname">Nickname:</label>
 
-                    <div class="col-sm-5">
+                    <div class="col-sm-5 col-md-4 col-lg-3">
                         <input id="nickname" class="form-control" type="text" required="true" minlength="1" ng-model="register_nick" auto-focus/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2"><span class="error" ng-show="selectedPlayerClassError" title="{{selectedPlayerClassError}}">{{selectedPlayerClassError}}!</span> Personality:</label>
+
+                    <div class="row-eq-height">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" ng-repeat="player_class in register_player_form_data.player_classes">
+                                <div class="player_class_box" ng-class="{'player_class_box-active': player_class.name == selectedPlayerClass}" ng-click="setSelectedPlayerClass(player_class.name)">
+                                    <div class="name">{{player_class.name}}</div>
+                                    <div>{{player_class.description}}</div>
+                                    <br/>
+                                    Stat modifiers:
+                                    <table class="stat_list">
+                                        <tr ng-repeat="(name, value) in player_class.stat_modifiers">
+                                            <td class="col-xs-3 stat_name">{{name.replace('stat_', '')}}:</td>
+                                            <td class="col-xs-1 stat_value">{{value}}</td>
+                                            <td class="col-xs-8"/>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">

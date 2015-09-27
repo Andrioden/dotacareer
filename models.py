@@ -19,6 +19,20 @@ class Player(ndb.Model):
     doing = ndb.KeyProperty(default=None)
     energy = ndb.IntegerProperty(default=EnergyConfig.maxEnergy)
     cash = ndb.FloatProperty(default=CashConfig.startingCash)
+    stat_mid = ndb.FloatProperty(default=0)
+    stat_offlane = ndb.FloatProperty(default=0)
+    stat_support = ndb.FloatProperty(default=0)
+    stat_carry = ndb.FloatProperty(default=0)
+    stat_farm = ndb.FloatProperty(default=0)
+    stat_gank = ndb.FloatProperty(default=0)
+    stat_push = ndb.FloatProperty(default=0)
+    stat_flaming = ndb.FloatProperty(default=0)
+    stat_concentration = ndb.FloatProperty(default=0)
+    stat_confidence = ndb.FloatProperty(default=0)
+    stat_morale = ndb.FloatProperty(default=0)
+    stat_trolling = ndb.FloatProperty(default=0)
+    stat_resistance_flaming = ndb.FloatProperty(default=0)
+    stat_resistance_trolling = ndb.FloatProperty(default=0)
 
     def get_data_nick_and_id(self):
         return {
