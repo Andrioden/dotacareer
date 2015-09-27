@@ -28,9 +28,15 @@ class MatchSimulator:
     def _set_stat_outcomes(self):
         for sim_player in (self.dire + self.radiant):
             if sim_player.db_player:
-                outcome = random.uniform(-1.0, 1.0)
+                # Skill
+                outcome = random.uniform(-0.2, 1.0)
                 self.logs.append("%s stat outcome for '%s': %s" % (sim_player.name, "skill", outcome))
-                sim_player.add_stat_outcome("skill", outcome)
+                sim_player.stat_outcomes.append(StatOutcome("skill", outcome))
+
+                # Hero overall
+                outcome = random.uniform(-0.2, 1.0)
+                self.logs.append("%s stat outcome for %s.%s: %s" % (sim_player.name, sim_player.hero, "stat_overall", outcome))
+                sim_player.stat_outcomes.append(StatOutcome("stat_overall", outcome, True, sim_player.hero))
 
     def _log(self, msg):
         print msg
@@ -38,7 +44,9 @@ class MatchSimulator:
 
 
 class MatchSimulatorPlayer:
-
+    """
+    :type stat_outcomes: list[StatOutcome]
+    """
     def __init__(self, name, hero, skill, db_combatant=None, db_player=None):
         self.name = name
         self.hero = hero
@@ -47,8 +55,19 @@ class MatchSimulatorPlayer:
         self.db_combatant = db_combatant
         self.db_player = db_player
 
-    def add_stat_outcome(self, stat, outcome):
-        self.stat_outcomes.append({
-            'stat': stat,
-            'outcome': outcome
-        })
+
+class StatOutcome:
+
+    def __init__(self, stat, outcome, is_hero_stat=False, hero=None):
+        self.stat = stat
+        self.outcome = outcome
+        self.is_hero_stat = is_hero_stat
+        self.hero = hero
+
+    # def to_dict(self):
+    #     return {
+    #         'stat': self.stat,
+    #         'outcome': self.outcome,
+    #         'is_hero_stat': self.is_hero_stat,
+    #         'hero': self.hero
+    #     }
