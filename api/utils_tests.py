@@ -47,6 +47,8 @@ class TestUtilsFunctions(unittest.TestCase):
         self.assertFalse(utils.is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(11, 15, 15))
         self.assertFalse(utils.is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(11, 15, 16))
 
+        self.assertTrue(utils.is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(0, 24, 0))
+
         # Normal - edge case 0
         self.assertFalse(utils.is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(0, 1, 23))
         self.assertFalse(utils.is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(0, 1, 24))

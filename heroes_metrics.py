@@ -21,7 +21,7 @@ hero_metrics = [
     # MID
     {
         'name': 'Pudge',
-        'potentials':  {
+        'potentials': {
             'mid': 75,
             'offlane': 25,
             'support': 25,

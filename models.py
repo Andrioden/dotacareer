@@ -2,12 +2,15 @@ from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 import random
 from gameconfig import EnergyConfig, CashConfig, BettingConfig
-import logging, json, random, copy
+import logging
+import json
+import random
+import copy
 from google.appengine.api import channel
 import datetime
 from heroes_metrics import get_flat_hero_name_list, hero_metrics
 from simulator.factories import MatchSimulatorFactory
-from simulator.matchsimulator import MatchSimulator # Imported so autocomplete works
+from simulator.matchsimulator import MatchSimulator  # Imported so PyCharm autocomplete works
 
 
 class Player(ndb.Model):
@@ -78,6 +81,16 @@ class Player(ndb.Model):
         channel.send_message(self.userid, json.dumps({'event': event, 'value': value}))
 
 
+class PlayerHeroStats(ndb.Model):
+    player = ndb.KeyProperty(kind=Player, required=True)
+    hero = ndb.StringProperty(required=True, choices=get_flat_hero_name_list())
+    stat_overall = ndb.FloatProperty(default=0)
+    stat_mid = ndb.FloatProperty(default=0)
+    stat_offlane = ndb.FloatProperty(default=0)
+    stat_support = ndb.FloatProperty(default=0)
+    stat_carry = ndb.FloatProperty(default=0)
+
+
 class PlayerConfig(ndb.Model):
     player = ndb.KeyProperty(kind=Player)
     name = ndb.StringProperty(default="New config")
@@ -104,8 +117,8 @@ class Team(ndb.Model):
     name = ndb.StringProperty(required=True)
     owner = ndb.KeyProperty(kind=Player, required=True)
     ranked_last_match = ndb.DateTimeProperty(default=datetime.datetime.now())
-    ranked_start_hour = ndb.IntegerProperty() # Is influenced by local time, so its not 0-24, it can be negative number
-    ranked_end_hour = ndb.IntegerProperty() # Is influenced by local time, so its not 0-24, it can be negative number
+    ranked_start_hour = ndb.IntegerProperty()  # Is influenced by local time, so its not 0-24, it can be negative number
+    ranked_end_hour = ndb.IntegerProperty()  # Is influenced by local time, so its not 0-24, it can be negative number
 
     def get_data(self, detail_level="simple"):
         data = {
@@ -165,11 +178,12 @@ class MatchSoloQueue(ndb.Model):
             match_queue_left.player.get().websocket_notify("NewPlayerDoingQueueCount", match_queues_after_deletion_count)
 
 
+# noinspection PyAttributeOutsideInit
 class Match(polymodel.PolyModel):
     type = ndb.StringProperty(required=True, choices=['Bot', 'Unranked', 'Ranked', 'TeamRanked'])
     date = ndb.DateTimeProperty(required=True)
     winning_faction = ndb.StringProperty(choices=['Dire', 'Radiant'])
-    logs = ndb.JsonProperty()
+    logs = ndb.StringProperty(repeated=True)
 
     def state(self):
         if self.winning_faction:
@@ -250,27 +264,45 @@ class Match(polymodel.PolyModel):
         self._put_combatants()
 
     def play_match(self):
+        # SIMULATE
         simulator = MatchSimulatorFactory().create(MatchCombatant.query(MatchCombatant.match == self.key).fetch())
         simulator.run()
         logging.info(simulator.get_printable_log())
 
-        self.winning_faction = simulator.winning_faction
-        self.logs = simulator.logs
-
+        # PROCESS STAT OUTCOMES
         for sim_player in (simulator.dire + simulator.radiant):
             if sim_player.db_combatant:
-                sim_player.db_combatant.stat_outcomes = sim_player.stat_outcomes
+                # sim_player.db_combatant.stat_outcomes = [stat_outcome.to_dict() for stat_outcome in sim_player.stat_outcomes]
                 for stat_outcome in sim_player.stat_outcomes:
-                    current_stat_value = getattr(sim_player.db_player, stat_outcome['stat'])
-                    new_stat_value = current_stat_value + stat_outcome['outcome']
-                    setattr(sim_player.db_player, stat_outcome['stat'], new_stat_value)
-                sim_player.db_combatant.put()
+                    if stat_outcome.is_hero_stat:
+                        self._update_or_create_player_hero_stats(sim_player.db_player, stat_outcome.hero, stat_outcome.stat, stat_outcome.outcome)
+                    else:
+                        current_stat_value = getattr(sim_player.db_player, stat_outcome.stat)
+                        new_stat_value = current_stat_value + stat_outcome.outcome
+                        setattr(sim_player.db_player, stat_outcome.stat, new_stat_value)
+                # sim_player.db_combatant.put()
                 sim_player.db_player.put()
 
+        # SAVE
+        self.winning_faction = simulator.winning_faction
+        self.logs.extend(simulator.logs)
         self.put()
         self._payout_bets()
 
-    def _pop_prioritized_hero(self, player, hero_name_pool):
+    @staticmethod
+    def _update_or_create_player_hero_stats(player, hero, stat, outcome):
+        player_hero_stats = PlayerHeroStats.query(PlayerHeroStats.player == player.key, PlayerHeroStats.hero == hero).get()
+        if not player_hero_stats:
+            player_hero_stats = PlayerHeroStats(player=player.key, hero=hero)
+
+        current_stat_value = getattr(player_hero_stats, stat)
+        new_stat_value = current_stat_value + outcome
+        setattr(player_hero_stats, stat, new_stat_value)
+
+        player_hero_stats.put()
+
+    @staticmethod
+    def _pop_prioritized_hero(player, hero_name_pool):
         active_player_config = PlayerConfig.query(PlayerConfig.player == player.key, PlayerConfig.active == True).get()
         if active_player_config and active_player_config.hero_priorities:
             for hero_pri in active_player_config.hero_priorities:
@@ -299,12 +331,14 @@ class Match(polymodel.PolyModel):
             combatant.match = self.key
             combatant.put()
 
-    def _get_shuffled_factions_spots(self):
+    @staticmethod
+    def _get_shuffled_factions_spots():
         faction_spots = ['Dire', 'Dire', 'Dire', 'Dire', 'Dire', 'Radiant', 'Radiant', 'Radiant', 'Radiant', 'Radiant']
         random.shuffle(faction_spots)
         return faction_spots
 
 
+# noinspection PyUnresolvedReferences,PyAttributeOutsideInit
 class TeamMatch(Match):
     dire = ndb.KeyProperty(kind=Team, required=True)
     radiant = ndb.KeyProperty(kind=Team, required=True)
@@ -322,12 +356,16 @@ class TeamMatch(Match):
         if len(dire_players) == 0 or len(radiant_players) == 0:
             raise Exception("0 dire or radiant players, this should rarely happen. Well, maybe. dire: %s radiant: %s" % (len(dire_players), len(radiant_players)))
 
-        if random.randint(0,1) == 1:
+        self.logs.append("--- Picking phase ---")
+        if random.randint(0, 1) == 1:
             picking_order = ["Dire", "Radiant", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire"]
+            self.logs.append("Dire won coin flip and picks first")
         else:
             picking_order = ["Radiant", "Dire", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant", "Dire", "Radiant"]
+            self.logs.append("Radiant won coin flip and picks first")
 
         hero_name_pool = [hero['name'] for hero in hero_metrics]
+        random.shuffle(hero_name_pool)
         players = []
         self.cached_combatants = []
         for faction in picking_order:
@@ -337,12 +375,16 @@ class TeamMatch(Match):
             player = picking_faction_player_list.pop()
 
             players.append(player)
+
+            picked_hero = self._pop_prioritized_hero(player, hero_name_pool)
+            self.logs.append("%s picked %s for %s" % (faction, picked_hero, player.nick))
             self.cached_combatants.append(MatchPlayer(
                 player=player.key,
                 faction=faction,
-                hero=self._pop_prioritized_hero(player, hero_name_pool)
+                hero=picked_hero
             ))
 
+        # SAVE
         dire.ranked_last_match = datetime.datetime.now()
         dire.put()
         radiant.ranked_last_match = datetime.datetime.now()
@@ -363,9 +405,11 @@ class MatchCombatant(polymodel.PolyModel):
     {
         'stat' string, # the variable name on the player/playerstat object
         'outcome: float, # the outcome/change of the stat value
+        'is_hero_stat'
+        'hero'
     }
     """
-    stat_outcomes = ndb.JsonProperty()
+    # stat_outcomes = ndb.JsonProperty()
 
     def get_base_data(self):
         return {

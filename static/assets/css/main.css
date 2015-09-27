@@ -97,3 +97,7 @@ h1 {
 {
     color: red;
 }
+
+*[popover] {
+    color: white;
+}

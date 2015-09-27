@@ -52,7 +52,7 @@ class TeamMatchmakingHandler(webapp2.RequestHandler):
         for team in Team.query().order(Team.ranked_last_match).fetch():
             if not is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(team.ranked_start_hour, team.ranked_end_hour, now_hour):
                 continue
-            if Player.query(Player.team == team.key, Player.doing == None).count() > 0:
+            if Player.query(Player.team == team.key, Player.doing == None).count() > 0: # Be aware that Player.doing == None will bug if you removed doing manually in dev console
                 eligible_teams.append(team)
 
         while len(eligible_teams) >= 2:
