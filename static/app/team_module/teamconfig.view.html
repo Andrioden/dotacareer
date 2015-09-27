@@ -5,7 +5,7 @@
     <div class="modal-body">
         <label>
             Ranked local play time
-            <span popover-placement="bottom" popover-trigger="mouseenter" popover="The selected hour range represent what local time your team may be matched with other teams for ranked team matches. Set them equal to opt-out."> (?)</span>
+            <span popover-placement="bottom" popover-trigger="mouseenter" popover="The selected hour range decide what (local) time your team may be matched with other teams for ranked team matches. Set them equal to opt-out."> (?)</span>
             <span ng-show="rankedTime.start_hour == rankedTime.end_hour">(off, drag sliders to turn on)</span>
         </label>
         <rzslider rz-slider-floor="0" rz-slider-ceil="24" rz-slider-model="rankedTime.start_hour" rz-slider-high="rankedTime.end_hour" rz-slider-translate="translateHoursToPrettyHours"></rzslider>

@@ -2,13 +2,15 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     // IMPORTANT CONTROLLER VARIABLES
     $scope.selectedConfigId = null;
     $scope.selectedConfig = null;
+    $scope.heroes = [];
 
     // CONSTRUCTOR
     setActiveConfigAsSelectedConfig();
 
     $http.get('/api/heroes/rest/', {cache: true}).
         then(function(response) {
-            $rootScope.heroes = response.data;
+            $scope.heroes = response.data;
+            addPlayerHeroStatsData($scope.heroes);
         }, function(response) {
             alertError(response);
         });
@@ -19,6 +21,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     };
 
     $scope.isCreatingNewConfig = false;
+
     $scope.createNewConfig = function() {
         $scope.isCreatingNewConfig = true;
         $http.post('/api/players/newConfig').
@@ -88,6 +91,23 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
         $scope.selectedConfig.hero_priorities.push({name: "", role: ""});
     }
 
+    $scope.getHeroPriorityRowRoleStat = function(index, role) {
+        var heroName = $scope.selectedConfig.hero_priorities[index].name;
+        for (var i=0; i<$scope.heroes.length; i++) {
+            if ($scope.heroes[i].name == heroName) {
+                if ($scope.heroes[i].playerStats) {
+                    if ($scope.heroes[i].playerStats.stats[role] == 0)
+                        return "";
+                    else if ($scope.heroes[i].playerStats.stats[role] > 0)
+                        return " (+" + $scope.heroes[i].playerStats.stats[role] + ")";
+                    else
+                        return " (" + $scope.heroes[i].playerStats.stats[role] + ")";
+                }
+                else return "";
+            }
+        }
+    }
+
     // PRIVATE FUNCTIONS
     function removeConfigFromConfigsList(id) {
         for(var i=0; i<$rootScope.player.configs.length; i++) {
@@ -106,6 +126,28 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     function deactivateAllConfigs() {
         for(var i=0; i<$rootScope.player.configs.length; i++)
             $rootScope.player.configs[i].active = false;
+    }
+
+    function addPlayerHeroStatsData(heroes) {
+        for (var i=0; i<heroes.length; i++) {
+            heroes[i].displayName = heroes[i].name;
+            for(var y=0; y<$rootScope.player.hero_stats.length; y++) {
+                if ($rootScope.player.hero_stats[y].hero == heroes[i].name) {
+                    heroes[i].playerStats = $rootScope.player.hero_stats[y];
+                    var statOverall = $rootScope.player.hero_stats[y].stats.overall;
+                    if (statOverall > 0) heroes[i].displayName = heroes[i].name + " (+" + statOverall + ")";
+                    else if (statOverall < 0) heroes[i].displayName = heroes[i].name + " (" + statOverall + ")";
+                }
+            }
+        }
+        // Sort by stats.overall
+        heroes.sort(function(a, b){
+            var aOverall = 0;
+            var bOverall = 0;
+            if (a.playerStats) aOverall = a.playerStats.stats.overall;
+            if (b.playerStats) bOverall = b.playerStats.stats.overall;
+            return bOverall - aOverall;
+        })
     }
 
 });

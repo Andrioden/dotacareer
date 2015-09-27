@@ -16,8 +16,8 @@
                 <button ng-click="createNewConfig()" class="btn btn-primary" ng-disabled="isCreatingNewConfig">+</button>
            </span>
         </div>
-        <br/>
-        <br/>
+        <hr>
+        <br>
 
         <div ng-show="selectedConfig != null">
             <!--NAME-->
@@ -28,26 +28,31 @@
             <br/>
 
             <!--HERO PRIORITIES-->
-            <label>Hero Priorities</label>
+            <label>
+                Hero Priorities
+                <span popover-trigger="mouseenter" popover="This priority list will impact what hero your player will play."> (?)</span>
+            </label>
 
             <form class="form-horizontal">
                 <div ng-repeat="heroPriority in selectedConfig.hero_priorities" class="form-group">
                     <div class="col-sm-1">{{$index + 1}}</div>
                     <div class="col-sm-6">
-                        <select ng-model="heroPriority.name" class="form-control">
-                            <option ng-repeat="hero in heroes | orderBy:'name'" value="{{hero.name}}" ng-selected="heroPriority.name == hero.name">{{hero.name}}</option>
+                        <select ng-model="heroPriority.name" class="form-control input-sm">
+                            <option ng-repeat="hero in heroes" value="{{hero.name}}" ng-selected="heroPriority.name == hero.name">
+                                {{hero.displayName}}
+                            </option>
                         </select>
                     </div>
                     <div class="col-sm-1">as</div>
                     <div class="col-sm-3">
-                        <select ng-model="heroPriority.role" class="form-control">
-                            <option value="mid">Mid</option>
-                            <option value="support">Support</option>
-                            <option value="carry">Carry</option>
-                            <option value="offlane">Offlane</option>
+                        <select ng-model="heroPriority.role" class="form-control input-sm">
+                            <option value="mid">Mid {{getHeroPriorityRowRoleStat($index, "mid")}}</option>
+                            <option value="support">Support {{getHeroPriorityRowRoleStat($index, "support")}}</option>
+                            <option value="carry">Carry {{getHeroPriorityRowRoleStat($index, "carry")}}</option>
+                            <option value="offlane">Offlane {{getHeroPriorityRowRoleStat($index, "offlane")}}</option>
                         </select>
                     </div>
-                    <button ng-click="removeHeroPriority($index)" class="btn btn-danger col-sm-1">-</button>
+                    <button ng-click="removeHeroPriority($index)" class="btn btn-sm btn-danger col-sm-1">-</button>
                 </div>
             </form>
             <button ng-click="addHeroPriority()" class="btn btn-primary" ng-disabled="isDoingConfigAction">+</button>

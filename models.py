@@ -55,11 +55,12 @@ class Player(ndb.Model):
         }
 
         if detail_level == "full":
-            match_keys = [match_player.match for match_player in MatchPlayer.query(MatchPlayer.player == self.key).fetch()]
+            match_keys = [match_player.match for match_player in MatchPlayer.query(MatchPlayer.player == self.key)]
             matches_data = [match.get_data("simple") for match in ndb.get_multi(match_keys)]
             data.update({
                 'matches': matches_data,
-                'configs': [config.get_data() for config in PlayerConfig.query(PlayerConfig.player == self.key).fetch()]
+                'configs': [config.get_data() for config in PlayerConfig.query(PlayerConfig.player == self.key)],
+                'hero_stats': [hero_stats.get_data() for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == self.key)]
             })
 
         return data
@@ -89,6 +90,20 @@ class PlayerHeroStats(ndb.Model):
     stat_offlane = ndb.FloatProperty(default=0)
     stat_support = ndb.FloatProperty(default=0)
     stat_carry = ndb.FloatProperty(default=0)
+
+    def get_data(self):
+        return {
+            'hero': self.hero,
+            'stats': self.get_stats_data(),
+        }
+
+    def get_stats_data(self):
+        data = {}
+        for variable_name in self.__dict__['_values'].keys(): # __dict__['_values'] contains all class object variables
+            if 'stat_' in variable_name:
+                variable_name_minus_stat_ = variable_name[5:]
+                data[variable_name_minus_stat_] = round(getattr(self, variable_name), 1)
+        return data
 
 
 class PlayerConfig(ndb.Model):
