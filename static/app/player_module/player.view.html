@@ -44,22 +44,90 @@
     </div>
 
     <div class="col-xs-12">
-        <div ng-show="player != null && !loadingPlayer" ng-cloak>
-            <h1>{{player.nick}}</h1>
+        <div class="row" ng-show="player != null && !loadingPlayer" ng-cloak>
+            <div class="col-xs-12 col-sm-6">
+                <h1>{{player.nick}}</h1>
 
-            <div>Skill: {{player.skill}}</div>
-            <div>Energy: {{player.energy}}</div>
-            <div>Cash: ${{player.cash}}</div>
-            <div>Doing: <span ng-show="player.doing == null">nothing</span>{{player.doing.what}} <span ng-show="player.doing.queued">({{player.doing.queued}} queued)</span></div>
+                <div>Skill: {{player.skill}}</div>
+                <div>Energy: {{player.energy}}</div>
+                <div>Cash: ${{player.cash}}</div>
+                <div>Doing: <span ng-show="player.doing == null">nothing</span>{{player.doing.what}} <span ng-show="player.doing.queued">({{player.doing.queued}} queued)</span></div>
 
-            <div class="btn-toolbar margin-vertical">
-                <button ng-click="openPlayerConfigDialog()" class="btn btn-primary">Player configuration</button>
+                <div class="btn-toolbar margin-vertical">
+                    <button ng-click="openPlayerConfigDialog()" class="btn btn-primary">Player configuration</button>
+                </div>
+                <div class="btn-toolbar margin-vertical">
+                    <button ng-show="player.doing == null" ng-click="playAgainstBots()" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Play against bots</button>
+                    <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Unranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join unranked solo queue</button>
+                    <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Ranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join ranked solo queue</button>
+                    <button ng-show="player.doing != null" ng-click="stopDoing()" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-warning">Stop doing whatever I am doing</button>
+                </div>
             </div>
-            <div class="btn-toolbar margin-vertical">
-                <button ng-show="player.doing == null" ng-click="playAgainstBots()" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Play against bots</button>
-                <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Unranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join unranked solo queue</button>
-                <button ng-show="player.doing == null" ng-click="joinSoloMatchQueue('Ranked')" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-primary">Join ranked solo queue</button>
-                <button ng-show="player.doing != null" ng-click="stopDoing()" ng-disabled="isDoingRelatedAjaxRunning" class="btn btn-warning">Stop doing whatever I am doing</button>
+            <div class="col-xs-12 col-sm-6">
+                <h1>Stats</h1>
+
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 table-responsive stats_list">
+                    <table class="col-xs-12">
+                        <tr>
+                            <th>Roles</th>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Mid:</td>
+                            <td class="col-xs-4 stat_value">{{player.stats.mid}}</td>
+                            <td class="col-xs-2 stat_name">Carry:</td>
+                            <td class="col-xs-4 stat_value">{{player.stats.carry}}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Offlane:</td>
+                            <td class="col-xs-4">{{player.stats.offlane}}</td>
+                            <td class="col-xs-2 stat_name">Support:</td>
+                            <td class="col-xs-4">{{player.stats.support}}</td>
+                        </tr>
+                        <tr>
+                            <th>Focus strengths</th>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Farm:</td>
+                            <td class="col-xs-4">{{player.stats.farm}}</td>
+                            <td class="col-xs-2 stat_name">Push:</td>
+                            <td class="col-xs-4">{{player.stats.push}}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Gank:</td>
+                            <td class="col-xs-4">{{player.stats.gank}}</td>
+                        </tr>
+
+                    </table>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 table-responsive stats_list">
+                    <table class="col-xs-12">
+                        <tr>
+                            <th>Psychological</th>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Flaming:</td>
+                            <td class="col-xs-4">{{player.stats.flaming}}</td>
+                            <td class="col-xs-2 stat_name">Flame resistance:</td>
+                            <td class="col-xs-4">{{player.stats.resistance_flaming}}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Trolling:</td>
+                            <td class="col-xs-4">{{player.stats.trolling}}</td>
+                            <td class="col-xs-2 stat_name">Troll resistance:</td>
+                            <td class="col-xs-4">{{player.stats.resistance_trolling}}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Concentration:</td>
+                            <td class="col-xs-4">{{player.stats.concentration}}</td>
+                            <td class="col-xs-2 stat_name">Morale:</td>
+                            <td class="col-xs-4">{{player.stats.morale}}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-2 stat_name">Confidence:</td>
+                            <td class="col-xs-4">{{player.stats.confidence}}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

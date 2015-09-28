@@ -1,6 +1,8 @@
 /* Part of installing the bootstrap lookalike components for AngularJS. https://angular-ui.github.io/bootstrap/ */
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
+/***** General ******/
+
 .row.view {
     margin: 10px 5px;
     padding: 2px;
@@ -9,15 +11,23 @@
 }
 
 .row-eq-height {
- display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display:         flex;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
 }
 
 .btn-toolbar.margin-vertical {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.error {
+    color: red;
+}
+
+*[popover] {
+    color: white;
 }
 
 body {
@@ -32,6 +42,10 @@ h1 {
 .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
     border-bottom: 1px solid #161616;
     border-top: 1px solid #161616;
+}
+
+.table>tbody>tr>td>div>button{
+    line-height: .6;
 }
 
 .modal-header {
@@ -51,12 +65,9 @@ h1 {
    color: #c33d2b;
 }
 
-.table>tbody>tr>td>div>button{
-    line-height: .6;
-}
+/***** Player ******/
 
-.player_class_box
-{
+.player_class_box {
     border: 1px solid #161616;
     background-color: #272727;
     border-radius: 5px;
@@ -69,8 +80,7 @@ h1 {
     color: #c33d2b;
 }
 
-.player_class_box:hover
-{
+.player_class_box:hover {
     cursor: pointer;
 }
 
@@ -78,26 +88,16 @@ h1 {
     background-color: #373737;
 }
 
-.stat_list
-{
-
+.stats_list td {
+    white-space: nowrap;
 }
 
-.stat_list .stat_name
-{
-    color: #c29700;
+.stats_list th {
+    padding-top: 15px;
+    font-weight: normal;
+    white-space: nowrap;
 }
 
-.stat_list .stat_value
-{
-    text-align: right;
-}
-
-.error
-{
-    color: red;
-}
-
-*[popover] {
-    color: white;
+.stats_list .stat_name {
+    color: #b47700;
 }

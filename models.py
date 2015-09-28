@@ -60,13 +60,23 @@ class Player(ndb.Model):
             data.update({
                 'matches': matches_data,
                 'configs': [config.get_data() for config in PlayerConfig.query(PlayerConfig.player == self.key)],
-                'hero_stats': [hero_stats.get_data() for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == self.key)]
+                'hero_stats': [hero_stats.get_data() for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == self.key)],
+                'stats': self.get_stats_data()
             })
 
         return data
 
     def get_active_player_config(self):
         return PlayerConfig.query(PlayerConfig.player == self.key, PlayerConfig.active == True).get()
+
+    def get_stats_data(self):
+        data = {}
+        for variable_name in self.__dict__['_values'].keys(): # __dict__['_values'] contains all class object variables
+            if 'stat_' in variable_name:
+                variable_name_minus_stat_ = variable_name.replace('stat_', '')
+                data[variable_name_minus_stat_] = round(getattr(self, variable_name), 1)
+        return data
+
 
     def stop_doing(self):
         doing = self.doing.get()
@@ -101,7 +111,7 @@ class PlayerHeroStats(ndb.Model):
         data = {}
         for variable_name in self.__dict__['_values'].keys(): # __dict__['_values'] contains all class object variables
             if 'stat_' in variable_name:
-                variable_name_minus_stat_ = variable_name[5:]
+                variable_name_minus_stat_ = variable_name.replace('stat_', '')
                 data[variable_name_minus_stat_] = round(getattr(self, variable_name), 1)
         return data
 
