@@ -84,7 +84,7 @@ class StopDoingHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
-class NewConfigHandler(webapp2.RequestHandler):
+class AddConfigHandler(webapp2.RequestHandler):
     def post(self):
         player = current_user_player()
         first_config = PlayerConfig.query(PlayerConfig.player == player.key).count() == 0
@@ -175,7 +175,7 @@ app = webapp2.WSGIApplication([
     (r'/api/players/register', RegisterHandler),
     (r'/api/players/my', MyHandler),
     (r'/api/players/stopDoing', StopDoingHandler),
-    (r'/api/players/newConfig', NewConfigHandler),
+    (r'/api/players/addConfig', AddConfigHandler),
     (r'/api/players/updateConfig', UpdateConfigHandler),
     (r'/api/players/deleteConfig', DeleteConfigHandler),
     (r'/api/players/setActiveConfig', SetActiveConfigHandler),

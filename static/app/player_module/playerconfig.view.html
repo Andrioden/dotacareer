@@ -7,13 +7,13 @@
         <label for="playerConfigSelect">Select configuration</label>
 
         <div class="input-group">
-            <select ng-model="selectedConfigId" ng-change="setSelectedConfig()" class="form-control" id="playerConfigSelect">
-                <option ng-repeat="config in player.configs | orderBy:'name'" value="{{config.id}}" ng-selected="config.active">
+            <select ng-model="_selectedConfigIdTempStorage" ng-change="setSelectedConfigIdAsSelectedConfig()" class="form-control" id="playerConfigSelect">
+                <option ng-repeat="config in player.configs | orderBy:'name'" value="{{config.id}}" ng-selected="config.id == selectedConfig.id">
                     {{config.active ? config.name + ' (active)' : config.name}}
                 </option>
             </select>
            <span class="input-group-btn">
-                <button ng-click="createNewConfig()" class="btn btn-primary" ng-disabled="isCreatingNewConfig">+</button>
+                <button ng-click="addConfig()" class="btn btn-primary" ng-disabled="isAddingConfig">+</button>
            </span>
         </div>
         <hr>

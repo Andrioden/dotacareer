@@ -1,10 +1,10 @@
 app.factory('WebSocketService', function(){
     var subscribers = [];
 
-    var isWebSocketActivated = true;
+    var isWebSocketActivated = false;
 
     if (isWebSocketActivated) {
-        var channel = new goog.appengine.Channel(websocket_channel_token);
+        var channel = new goog.appengine.Channel(websocketChannelToken);
         var socket = channel.open();
 
         socket.onopen = function(){

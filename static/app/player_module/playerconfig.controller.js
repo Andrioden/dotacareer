@@ -1,6 +1,6 @@
 app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $modalInstance, $http) {
     // IMPORTANT CONTROLLER VARIABLES
-    $scope.selectedConfigId = null;
+    $scope._selectedConfigIdTempStorage = null; // Only used as the ng-model the config selector should point to, should not be used.
     $scope.selectedConfig = null;
     $scope.heroes = [];
 
@@ -20,25 +20,28 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
         $modalInstance.dismiss('cancel');
     };
 
-    $scope.isCreatingNewConfig = false;
+    $scope.isAddingConfig = false;
 
-    $scope.createNewConfig = function() {
-        $scope.isCreatingNewConfig = true;
-        $http.post('/api/players/newConfig').
+    $scope.addConfig = function() {
+        $scope.isAddingConfig = true;
+        $http.post('/api/players/addConfig').
             then(function(response) {
                 $rootScope.player.configs.push(response.data);
                 $scope.selectedConfig = response.data;
-                $scope.isCreatingNewConfig = false;
+                $scope.isAddingConfig = false;
             }, function(response) {
                 alertError(response);
-                $scope.isCreatingNewConfig = false;
+                $scope.isAddingConfig = false;
             });
     }
 
-    $scope.setSelectedConfig = function() {
+    $scope.setSelectedConfigIdAsSelectedConfig = function() {
         for(var i=0; i<$rootScope.player.configs.length; i++) {
-            if ($rootScope.player.configs[i].id == $scope.selectedConfigId)
+            if ($rootScope.player.configs[i].id == $scope._selectedConfigIdTempStorage) {
                 $scope.selectedConfig = $rootScope.player.configs[i];
+                $scope._selectedConfigIdTempStorage = null; // Just to make it 100% clear that this variable should not be used
+                return;
+            }
         }
     }
 
