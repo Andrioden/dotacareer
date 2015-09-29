@@ -22,10 +22,10 @@
                                     <div>{{player_class.description}}</div>
                                     <br/>
                                     Stat modifiers:
-                                    <table class="stat_list">
+                                    <table class="stats_list">
                                         <tr ng-repeat="(name, value) in player_class.stat_modifiers">
-                                            <td class="col-xs-3 stat_name">{{name.replace('stat_', '')}}:</td>
-                                            <td class="col-xs-1 stat_value">{{value}}</td>
+                                            <td class="col-xs-3 stats_color">{{name.replace('stat_', '')}}:</td>
+                                            <td class="col-xs-1">{{value}}</td>
                                             <td class="col-xs-8"/>
                                         </tr>
                                     </table>
@@ -72,28 +72,28 @@
                             <th>Roles</th>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Mid:</td>
-                            <td class="col-xs-4 stat_value">{{player.stats.mid}}</td>
-                            <td class="col-xs-2 stat_name">Carry:</td>
-                            <td class="col-xs-4 stat_value">{{player.stats.carry}}</td>
+                            <td class="col-xs-2 stats_color">Mid:</td>
+                            <td class="col-xs-4">{{player.stats.mid}}</td>
+                            <td class="col-xs-2 stats_color">Carry:</td>
+                            <td class="col-xs-4">{{player.stats.carry}}</td>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Offlane:</td>
+                            <td class="col-xs-2 stats_color">Offlane:</td>
                             <td class="col-xs-4">{{player.stats.offlane}}</td>
-                            <td class="col-xs-2 stat_name">Support:</td>
+                            <td class="col-xs-2 stats_color">Support:</td>
                             <td class="col-xs-4">{{player.stats.support}}</td>
                         </tr>
                         <tr>
                             <th>Focus strengths</th>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Farm:</td>
+                            <td class="col-xs-2 stats_color">Farm:</td>
                             <td class="col-xs-4">{{player.stats.farm}}</td>
-                            <td class="col-xs-2 stat_name">Push:</td>
+                            <td class="col-xs-2 stats_color">Push:</td>
                             <td class="col-xs-4">{{player.stats.push}}</td>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Gank:</td>
+                            <td class="col-xs-2 stats_color">Gank:</td>
                             <td class="col-xs-4">{{player.stats.gank}}</td>
                         </tr>
 
@@ -105,25 +105,25 @@
                             <th>Psychological</th>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Flaming:</td>
+                            <td class="col-xs-2 stats_color">Flaming:</td>
                             <td class="col-xs-4">{{player.stats.flaming}}</td>
-                            <td class="col-xs-2 stat_name">Flame resistance:</td>
+                            <td class="col-xs-2 stats_color">Flame resistance:</td>
                             <td class="col-xs-4">{{player.stats.resistance_flaming}}</td>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Trolling:</td>
+                            <td class="col-xs-2 stats_color">Trolling:</td>
                             <td class="col-xs-4">{{player.stats.trolling}}</td>
-                            <td class="col-xs-2 stat_name">Troll resistance:</td>
+                            <td class="col-xs-2 stats_color">Troll resistance:</td>
                             <td class="col-xs-4">{{player.stats.resistance_trolling}}</td>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Concentration:</td>
+                            <td class="col-xs-2 stats_color">Concentration:</td>
                             <td class="col-xs-4">{{player.stats.concentration}}</td>
-                            <td class="col-xs-2 stat_name">Morale:</td>
+                            <td class="col-xs-2 stats_color">Morale:</td>
                             <td class="col-xs-4">{{player.stats.morale}}</td>
                         </tr>
                         <tr>
-                            <td class="col-xs-2 stat_name">Confidence:</td>
+                            <td class="col-xs-2 stats_color">Confidence:</td>
                             <td class="col-xs-4">{{player.stats.confidence}}</td>
                         </tr>
                     </table>
