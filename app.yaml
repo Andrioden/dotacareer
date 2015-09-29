@@ -24,6 +24,10 @@ handlers:
 - url: /api/heroes/.*
   script: api.heroes.app
 
+- url: /api/admin/.*
+  script: api.admin.app
+  login: admin
+
 - url: /cron/.*
   script: cron.app
   login: admin
