@@ -91,6 +91,17 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
         }
     }
 
+    $scope.leaveTeam = function() {
+        if (confirm("Are you sure you want to leave the team?")) {
+            $http.post('/api/teams/leaveTeam').
+                then(function(response) {
+                    $scope.player.team = null;
+                }, function(response) {
+                    alertError(response);
+                });
+        }
+    }
+
     $scope.openTeamConfigDialog = function() {
         var modalInstance = $modal.open({
             animation: true,

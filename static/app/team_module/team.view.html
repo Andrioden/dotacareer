@@ -48,6 +48,7 @@
                         <td>
                             <div class="btn-toolbar pull-right">
                                 <button ng-click="kickMember(member)" class="btn btn-warning" ng-show="player.id == player.team.owner.id && member.id != player.team.owner.id">Kick</button>
+                                <button ng-click="leaveTeam()" class="btn btn-warning" ng-show="player.id == member.id">Leave</button>
                             </div>
                         </td>
                     </tr>

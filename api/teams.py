@@ -3,6 +3,7 @@
 import webapp2
 import logging
 import datetime
+import random
 from utils import *
 from models import Player, Team, TeamApplication
 from google.appengine.ext import ndb
@@ -132,6 +133,30 @@ class KickMemberHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
+class LeaveTeamHandler(webapp2.RequestHandler):
+    def post(self):
+        player = current_user_player()
+        team_key = player.team
+
+        # DO SHIT
+        player.team = None
+        player.put()
+
+        ndb.get_context().clear_cache()
+        team = team_key.get()
+        team_data = team.get_data('full')
+
+        if len(team_data['members']) == 0:
+            team.delete()
+
+        elif len(team_data['members']) > 0:
+            new_team_leader = random.choice(team_data['members'])
+            team.owner = ndb.Key(Player, int(new_team_leader['id']))
+            team.put()
+
+        set_json_response(self.response, {'code': "OK"})
+
+
 class UpdateConfigHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
@@ -177,5 +202,6 @@ app = webapp2.WSGIApplication([
     (r'/api/teams/acceptApplication', AcceptApplicationHandler),
     (r'/api/teams/declineApplication', DeclineApplicationHandler),
     (r'/api/teams/kickMember', KickMemberHandler),
+    (r'/api/teams/leaveTeam', LeaveTeamHandler),
     (r'/api/teams/updateConfig', UpdateConfigHandler)
 ], debug=True)
