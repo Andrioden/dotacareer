@@ -6,15 +6,14 @@ from gameconfig import EnergyConfig, CashConfig
 import datetime
 from api.utils import is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue
 
+
 class EnergyTickHandler(webapp2.RequestHandler):
     def get(self):
-        players = Player.query(Player.energy < EnergyConfig.maxEnergy)
-
-        for player in players:
-            player.energy += EnergyConfig.tickAmount
-            if player.energy > EnergyConfig.maxEnergy:
-                player.energy = EnergyConfig.maxEnergy
-            player.put()
+        for player in Player.query(Player.energy < EnergyConfig.maxEnergy):
+            if player.energy < EnergyConfig.maxEnergy:
+                player.energy = min(EnergyConfig.maxEnergy, player.energy + EnergyConfig.tickAmount)
+                player.websocket_notify("Player_NewEnergyValue", player.energy)
+                player.put()
 
 
 class CashTickHandler(webapp2.RequestHandler):
@@ -49,7 +48,9 @@ class TeamMatchmakingHandler(webapp2.RequestHandler):
     def get(self):
         now_hour = datetime.datetime.now().hour
         eligible_teams = []
-        for team in Team.query().order(Team.ranked_last_match).fetch():
+        for team in Team.query().order(Team.ranked_last_match):
+            if team.ranked_start_hour is None or team.ranked_end_hour is None:
+                continue
             if not is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(team.ranked_start_hour, team.ranked_end_hour, now_hour):
                 continue
             if Player.query(Player.team == team.key, Player.doing == None).count() > 0: # Be aware that Player.doing == None will bug if you removed doing manually in dev console
@@ -73,18 +74,6 @@ class FinishMatchesHandler(webapp2.RequestHandler):
                 player.doing = None
                 player.put()
                 player.websocket_notify("Match_Finished", match.get_data("full"))
-
-
-
-
-        # Cant use ndb to filter with two inequality checks http://stackoverflow.com/questions/2671587/appengine-filter-inequality-and-ordering-fails
-        # So we do half the filtering with the query, and the other half with python
-        # teams_with_ranked_time_now = [team for team in Team.query(Team.ranked_time_start <= datetime.time(now_hour)).fetch() if team.ranked_time_end.hour >= now_hour]
-        # for team in teams_with_ranked_time_now:
-        #     available_players = Player.query(Player.team == team.key, Player.doing == None)
-        #     if available_players.count() > 0:
-
-
 
 
 app = webapp2.WSGIApplication([

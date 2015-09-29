@@ -15,8 +15,12 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         $rootScope.player.doing = match;
         $rootScope.$apply();
     });
-    WebSocketService.subscribe("Player_CashChange", function(payout){
-        $rootScope.player.cash += payout;
+    WebSocketService.subscribe("Player_CashChange", function(change){
+        $rootScope.player.cash += change;
+        $rootScope.$apply();
+    });
+    WebSocketService.subscribe("Player_NewEnergyValue", function(value){
+        $rootScope.player.energy = value;
         $rootScope.$apply();
     });
 

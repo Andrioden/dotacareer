@@ -98,6 +98,7 @@ class BetHandler(webapp2.RequestHandler):
         player.cash -= bet_value_dif
         player.put()
 
+        match.websocket_notify_players("Match_UpdatedOrNewBet", bet.get_data())
         set_json_response(self.response, {'bet': bet.get_data(), 'cash': player.cash})
 
 

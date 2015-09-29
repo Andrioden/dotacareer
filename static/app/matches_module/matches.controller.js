@@ -1,16 +1,6 @@
 app.controller('MatchesController', function($rootScope, $scope, $modal, WebSocketService){
 
-    // EXPOSED ACTIONS FOR HTML
-    $scope.openMatchDialog = function (match) {
-        var modalInstance = $modal.open({
-            animation: true,
-            templateUrl: 'matchDialog.html',
-            controller: 'MatchDialogController',
-            resolve: { // Data passed to the dialog, has to be a function. Its the angularjs pattern for it i guess
-                match: function() {return match;}
-            }
-        });
-    };
+
 
     // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
     $scope.$on('MatchesControllerEvent_OpenMatchDialog', function(event, match) {
@@ -25,16 +15,49 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
         addOrExtendMatch(match);
         $rootScope.$apply();
     });
+    WebSocketService.subscribe("Match_UpdatedOrNewBet", function(bet){
+        addOrExtendBet(bet);
+        $rootScope.$apply();
+    });
+
+    // EXPOSED ACTIONS FOR HTML
+    $scope.openMatchDialog = function (match) {
+        var modalInstance = $modal.open({
+            animation: true,
+            templateUrl: 'matchDialog.html',
+            controller: 'MatchDialogController',
+            resolve: { // Data passed to the dialog, has to be a function. Its the angularjs pattern for it i guess
+                match: function() {return match;}
+            }
+        });
+    };
 
     // PRIVATE FUNCTIONS
-    function addOrExtendMatch(match) {
+    function getLocalMatch(matchId) {
         for(var i=0; i<$rootScope.player.matches.length; i++) {
-            if ($rootScope.player.matches[i].id == match.id) {
-                extendObjectWithObject($rootScope.player.matches[i], match);
-                return;
+            if ($rootScope.player.matches[i].id == matchId) {
+                return $rootScope.player.matches[i];
             }
         }
-        $rootScope.player.matches.push(match);
+    }
+
+    function addOrExtendMatch(match) {
+        var localMatch = getLocalMatch(match.id);
+        if (localMatch) extendObjectWithObject(localMatch, match);
+        else $rootScope.player.matches.push(match);
+    }
+
+    function addOrExtendBet(bet) {
+        var localMatch = getLocalMatch(bet.match.id);
+        if (localMatch.bets) {
+            for(var i=0; i<localMatch.bets.length; i++) {
+                if (localMatch.bets[i].id == bet.id) {
+                    extendObjectWithObject(localMatch.bets[i], bet);
+                    return;
+                }
+            }
+            localMatch.bets.push(bet);
+        }
     }
 
 });

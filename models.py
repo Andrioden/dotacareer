@@ -245,6 +245,10 @@ class Match(polymodel.PolyModel):
 
         return data
 
+    def websocket_notify_players(self, event, value):
+        for match_player in MatchPlayer.query(MatchPlayer.match == self.key):
+            match_player.player.get().websocket_notify(event, value)
+
     def setup_soloqueue_match(self, players):
         self.date = datetime.datetime.now() + datetime.timedelta(minutes=BettingConfig.betting_window_minutes)
         random.shuffle(players)
@@ -472,6 +476,9 @@ class Bet(ndb.Model):
     def get_data(self):
         return {
             'id': self.key.id(),
+            'match': {
+                'id': self.match.id()
+            },
             'player': self.player.get().get_data_nick_and_id(),
             'value': self.value,
             'winning_faction': self.winning_faction,
