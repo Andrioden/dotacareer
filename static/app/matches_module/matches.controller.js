@@ -17,12 +17,11 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
         $scope.openMatchDialog(match);
     });
 
-    WebSocketService.subscribe("MatchFound", function(match){
+    WebSocketService.subscribe("Player_MatchFound", function(match){
         addOrExtendMatch(match);
         $rootScope.$apply();
     });
-
-    WebSocketService.subscribe("MatchFinished", function(match){
+    WebSocketService.subscribe("Match_Finished", function(match){
         addOrExtendMatch(match);
         $rootScope.$apply();
     });

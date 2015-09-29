@@ -24,7 +24,7 @@ class CashTickHandler(webapp2.RequestHandler):
         for player in players:
             player.cash += CashConfig.tickAmount
             player.put()
-            player.websocket_notify("CashChange", CashConfig.tickAmount)
+            player.websocket_notify("Player_CashChange", CashConfig.tickAmount)
 
 
 class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
@@ -42,7 +42,7 @@ class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
             for player in players:
                 player.doing = match.key
                 player.put()
-                player.websocket_notify("MatchFound", match.get_data())
+                player.websocket_notify("Player_MatchFound", match.get_data())
 
 
 class TeamMatchmakingHandler(webapp2.RequestHandler):
@@ -61,7 +61,7 @@ class TeamMatchmakingHandler(webapp2.RequestHandler):
             for player in players:
                 player.doing = match.key
                 player.put()
-                player.websocket_notify("MatchFound", match.get_data())
+                player.websocket_notify("Player_MatchFound", match.get_data())
 
 
 class FinishMatchesHandler(webapp2.RequestHandler):
@@ -72,7 +72,7 @@ class FinishMatchesHandler(webapp2.RequestHandler):
                 player = match_player.player.get()
                 player.doing = None
                 player.put()
-                player.websocket_notify("MatchFinished", match.get_data("full"))
+                player.websocket_notify("Match_Finished", match.get_data("full"))
 
 
 

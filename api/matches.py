@@ -39,7 +39,7 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
         all_match_queues = MatchSoloQueue.query(MatchSoloQueue.type == match_queue_type)
         all_match_queues_count = all_match_queues.count()
         for match_queue in all_match_queues:
-            match_queue.player.get().websocket_notify("NewPlayerDoingQueueCount", all_match_queues_count)
+            match_queue.player.get().websocket_notify("Match_NewQueueCount", all_match_queues_count)
 
 
 class PlayAgainstBotsHandler(webapp2.RequestHandler):

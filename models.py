@@ -88,7 +88,7 @@ class Player(ndb.Model):
         else:
             return "Cant stop doing %s" % doing.what()
 
-    def websocket_notify(self, event, value):
+    def websocket_notify(self, event, value=None):
         channel.send_message(self.userid, json.dumps({'event': event, 'value': value}))
 
 
@@ -200,7 +200,7 @@ class MatchSoloQueue(ndb.Model):
         match_queues = MatchSoloQueue.query(MatchSoloQueue.type == key.get().type)
         match_queues_after_deletion_count = match_queues.count() - 1
         for match_queue_left in match_queues:
-            match_queue_left.player.get().websocket_notify("NewPlayerDoingQueueCount", match_queues_after_deletion_count)
+            match_queue_left.player.get().websocket_notify("Match_NewQueueCount", match_queues_after_deletion_count)
 
 
 # noinspection PyAttributeOutsideInit
@@ -346,7 +346,7 @@ class Match(polymodel.PolyModel):
                 player.cash += payout
                 player.put()
                 bet.payout = payout
-                player.websocket_notify("CashChange", payout)
+                player.websocket_notify("Player_CashChange", payout)
             else:
                 bet.payout = 0
             bet.put()

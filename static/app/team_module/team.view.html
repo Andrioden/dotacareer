@@ -42,7 +42,7 @@
                 <h3 class="sub-header">Members:</h3>
                 <table class="table">
                     <tbody>
-                    <tr ng-repeat="member in player.team.members">
+                    <tr ng-repeat="member in player.team.members | orderBy:'nick'">
                         <td>{{member.nick}}<span ng-show="member.id == player.team.owner.id"> (owner)</span></td>
 
                         <td>
@@ -62,29 +62,36 @@
 
 
 <script type="text/ng-template" id="createTeamDialog.html">
-    <div class="modal-header">
-        <h3 class="modal-title">Create a new DOTA team</h3>
-    </div>
-    <div class="modal-body">
-        <input type="text" ng-model="team_name" placeholder="Team name" class="form-control">
-    </div>
-    <div class="modal-footer">
-        <button type="button" ng-click="ok()" class="btn btn-primary">Create</button>
-        <button type="button" ng-click="cancel()" class="btn btn-warning">Cancel</button>
-    </div>
+    <form id="createTeamForm" ng-submit="ok()" role="form">
+        <div class="modal-header">
+            <h3 class="modal-title">Create a new DOTA team</h3>
+        </div>
+        <div class="modal-body">
+            <input type="text" ng-model="team_name" placeholder="Team name" class="form-control" required>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" form="createTeamForm" class="btn btn-primary">Create</button>
+            <button type="button" ng-click="cancel()" class="btn btn-warning">Cancel</button>
+        </div>
+    </form>
 </script>
 
 
 <script type="text/ng-template" id="applyTeamDialog.html">
-    <div class="modal-header">
-        <h3 class="modal-title">Apply to a new DOTA team</h3>
-    </div>
-    <div class="modal-body">
-        <select ng-model="team_id" ng-options="team.id as team.name for team in teams" class="form-control"></select>
-        <input type="text" ng-model="application_text" placeholder="Application text" class="form-control">
-    </div>
-    <div class="modal-footer">
-        <button type="button" ng-click="ok()" class="btn btn-primary">Apply</button>
-        <button type="button" ng-click="cancel()" class="btn btn-warning">Cancel</button>
-    </div>
+    <form id="applyTeamForm" ng-submit="ok()" role="form">
+        <div class="modal-header">
+            <h3 class="modal-title">Apply to a new DOTA team</h3>
+        </div>
+        <div class="modal-body">
+            <select ng-model="teamId" ng-options="team.id as team.name for team in teams" class="form-control" required>
+                <option value=""></option>
+                <!--Needed to trigger form validation on the select-->
+            </select>
+            <input type="text" ng-model="applicationText" placeholder="Application text" class="form-control" required>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" form="applyTeamForm" class="btn btn-primary">Apply</button>
+            <button type="button" ng-click="cancel()" class="btn btn-warning">Cancel</button>
+        </div>
+    </form>
 </script>

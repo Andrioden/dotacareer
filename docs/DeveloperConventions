@@ -1,3 +1,8 @@
+WebSocket messages
+- Should be named in the following format [EntityInFocus]_[Action]. The best example to illustrate this is what was previously called "MatchFound" and "MatchFinished"
+    which are now "Player_MatchFound"  - Because it is the players that is in focus and that is targeted by the notification.
+    and "Match_Finished" - Because its the match related players that are targeted by the notification.
+
 Javascript:
 - Variable and scope variables names: variableName
 - Method name: methodName

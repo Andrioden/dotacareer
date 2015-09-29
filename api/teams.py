@@ -32,7 +32,7 @@ class RegisterHandler(webapp2.RequestHandler):
         player.team = new_team.key
         player.put()
 
-        ndb.get_context().clear_cache() # Required to get the new player as part of the get_data
+        ndb.get_context().clear_cache()  # Required to get the new player as part of the get_data
         set_json_response(self.response, {'team': new_team.get_data('full')})
 
 
@@ -62,9 +62,7 @@ class SendApplicationHandler(webapp2.RequestHandler):
             text=request_data['text']
         ).put().get()
 
-        for team_player in Player.query(Player.team == team_key).fetch():
-            team_player.websocket_notify('NewTeamApplication', team_application.get_data())
-
+        _websocket_notify_team(team_key, 'Team_NewApplication', team_application.get_data())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -72,12 +70,12 @@ class AcceptApplicationHandler(webapp2.RequestHandler):
     def post(self):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
-        player = current_user_player()
+        team_owner = current_user_player()
         application = TeamApplication.get_by_id(int(request_data['application_id']))
-        application_to_team = application.team.get()
+        team = application.team.get()
 
         # VALIDATIONS
-        if not _validate_is_team_owner(self.response, player, application_to_team):
+        if not _validate_is_team_owner(self.response, team_owner, team):
             return
 
         # DO SHIT
@@ -86,6 +84,8 @@ class AcceptApplicationHandler(webapp2.RequestHandler):
         applicant.put()
         application.key.delete()
 
+        applicant.websocket_notify('Player_TeamApplicationAccepted', team.get_data("full"))
+        _websocket_notify_team(team.key, 'Team_NewMember', applicant.get_data_nick_and_id())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -95,15 +95,16 @@ class DeclineApplicationHandler(webapp2.RequestHandler):
         logging.info(request_data)
         player = current_user_player()
         application = TeamApplication.get_by_id(int(request_data['application_id']))
-        application_to_team = application.team.get()
+        team = application.team.get()
 
         # VALIDATIONS
-        if not _validate_is_team_owner(self.response, player, application_to_team):
+        if not _validate_is_team_owner(self.response, player, team):
             return
 
         # DO SHIT
         application.key.delete()
 
+        _websocket_notify_team(team.key, 'Team_ApplicationDeclined', application.get_data())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -113,10 +114,10 @@ class KickMemberHandler(webapp2.RequestHandler):
         logging.info(request_data)
         player = current_user_player()
         kicked_player = Player.get_by_id(int(request_data['player_id']))
-        kicked_player_team = kicked_player.team.get()
+        team = kicked_player.team.get()
 
         # VALIDATIONS
-        if not _validate_is_team_owner(self.response, player, kicked_player_team):
+        if not _validate_is_team_owner(self.response, player, team):
             return
         if player == kicked_player:
             error_400(self.response, "ERROR_CANT_KICK_SELF", "You cannot kick yourself from your own team. Are you retarded?")
@@ -126,6 +127,8 @@ class KickMemberHandler(webapp2.RequestHandler):
         kicked_player.team = None
         kicked_player.put()
 
+        kicked_player.websocket_notify('Player_KickedFromTeam')
+        _websocket_notify_team(team.key, 'Team_KickedMember', kicked_player.get_data_nick_and_id())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -146,6 +149,7 @@ class UpdateConfigHandler(webapp2.RequestHandler):
 
         set_json_response(self.response, {'code': "OK"})
 
+
 def _validate_has_no_team(response, player):
     if player.team:
         error_400(response, "ERROR_HAS_TEAM", "Your player can only be part of 1 team.")
@@ -161,6 +165,10 @@ def _validate_is_team_owner(response, player, team):
     else:
         return True
 
+
+def _websocket_notify_team(team_key, event, value):
+    for team_player in Player.query(Player.team == team_key).fetch():
+        team_player.websocket_notify(event, value)
 
 app = webapp2.WSGIApplication([
     (r'/api/teams/register', RegisterHandler),

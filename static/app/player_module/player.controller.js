@@ -3,22 +3,19 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
     $rootScope.player = undefined;
 
     // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
-    WebSocketService.subscribe("NewPlayerDoingQueueCount", function(newMatchQueueCount){
+    WebSocketService.subscribe("Match_NewQueueCount", function(newMatchQueueCount){
         if ($rootScope.player.doing) $rootScope.player.doing.queued = newMatchQueueCount;
         $rootScope.$apply();
     });
-
-    WebSocketService.subscribe("MatchFinished", function(match){
+    WebSocketService.subscribe("Match_Finished", function(match){
         $rootScope.player.doing = null;
         $rootScope.$apply();
     });
-
-    WebSocketService.subscribe("MatchFound", function(match){
+    WebSocketService.subscribe("Player_MatchFound", function(match){
         $rootScope.player.doing = match;
         $rootScope.$apply();
     });
-
-    WebSocketService.subscribe("CashChange", function(payout){
+    WebSocketService.subscribe("Player_CashChange", function(payout){
         $rootScope.player.cash += payout;
         $rootScope.$apply();
     });
