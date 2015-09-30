@@ -8,6 +8,7 @@ from models import Player, PlayerConfig
 from google.appengine.api import users
 from heroes_metrics import is_valid_hero_name
 from player_class_metrics import player_class_metrics, is_valid_player_class_name
+from google.appengine.ext import ndb
 
 
 class RegisterHandler(webapp2.RequestHandler):
@@ -32,7 +33,7 @@ class RegisterHandler(webapp2.RequestHandler):
 
         # REGISTER PLAYER
         new_player = Player(
-            userid=user.user_id(),
+            id=user.user_id(),
             nick=request_data['nick'],
             skill=10.0
         )
@@ -49,7 +50,8 @@ class RegisterHandler(webapp2.RequestHandler):
         set_json_response(self.response, new_player.get_data("full"))
 
     def _validate_has_not_player_already(self, user):
-        if Player.query(Player.userid == user.user_id()).count() > 0:
+        player_key = ndb.Key(Player, user.user_id())
+        if Player.query(Player.key == player_key).count() > 0:
             error_400(self.response, "ERROR_HAS_PLAYER", "You can only register 1 player")
             return False
         else:

@@ -14,7 +14,6 @@ from simulator.matchsimulator import MatchSimulator  # Imported so PyCharm autoc
 
 
 class Player(ndb.Model):
-    userid = ndb.StringProperty(required=True)
     nick = ndb.StringProperty(required=True)
     nick_lower = ndb.ComputedProperty(lambda self: self.nick.lower())
     skill = ndb.FloatProperty(required=True)
@@ -89,7 +88,7 @@ class Player(ndb.Model):
             return "Cant stop doing %s" % doing.what()
 
     def websocket_notify(self, event, value=None):
-        channel.send_message(self.userid, json.dumps({'event': event, 'value': value}))
+        channel.send_message(self.key.id(), json.dumps({'event': event, 'value': value}))
 
 
 class PlayerHeroStats(ndb.Model):
@@ -358,7 +357,7 @@ class Match(polymodel.PolyModel):
     def _put_combatants(self):
         for combatant in self.cached_combatants:
             combatant.match = self.key
-            combatant.put()
+        ndb.put_multi(self.cached_combatants)
 
     @staticmethod
     def _get_shuffled_factions_spots():

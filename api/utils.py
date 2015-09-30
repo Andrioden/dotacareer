@@ -2,7 +2,7 @@ import json
 from google.appengine.api import users
 from models import Player
 import datetime
-
+from google.appengine.ext import ndb
 
 def error_400(response, code, message):
     response.headers['Content-Type'] = 'application/json'
@@ -40,7 +40,7 @@ def set_json_response(response, data):
 
 def current_user_player():
     user = users.get_current_user()
-    return Player.query(Player.userid == user.user_id()).get()
+    return ndb.Key(Player, user.user_id()).get()
 
 
 def is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(start_hour, end_hour, check_hour):

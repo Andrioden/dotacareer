@@ -19,7 +19,7 @@ class MainHandler(webapp2.RequestHandler):
 
         channel_token = channel.create_channel(user.user_id())
         template_values = {'channel_token': channel_token}
-        logging.info("Creating websocket channel with userid %s which is token %s" % (user.user_id(), channel_token))
+        logging.info("Creating websocket channel with userid/player.key.id() %s which is token %s" % (user.user_id(), channel_token))
 
         template = JINJA_ENVIRONMENT.get_template("index.html")
         self.response.write(template.render(template_values))
