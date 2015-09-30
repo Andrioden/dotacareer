@@ -7,7 +7,7 @@
     margin: 10px 5px;
     padding: 2px;
     background-color: #272727;
-    background-image: url("../images/view_bg_texture.png");
+    background-image: url("/static/assets/images/view_bg_texture.PNG");
 }
 
 .row-eq-height {
