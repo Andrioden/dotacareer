@@ -136,24 +136,23 @@ class KickMemberHandler(webapp2.RequestHandler):
 class LeaveTeamHandler(webapp2.RequestHandler):
     def post(self):
         player = current_user_player()
-        team_key = player.team
+        team = player.team.get()
 
         # DO SHIT
+        players_query = Player.query(Player.team == team.key)
+
+        if players_query.count() > 1:
+            if team.owner == player.key:
+                new_team_leader = players_query.get()
+                team.owner = new_team_leader.key
+                team.put()
+        elif players_query.count() == 1:
+            team.key.delete()
+
         player.team = None
         player.put()
 
-        ndb.get_context().clear_cache()
-        team = team_key.get()
-        team_data = team.get_data('full')
-
-        if len(team_data['members']) == 0:
-            team.delete()
-
-        elif len(team_data['members']) > 0:
-            new_team_leader = random.choice(team_data['members'])
-            team.owner = ndb.Key(Player, int(new_team_leader['id']))
-            team.put()
-
+        _websocket_notify_team(team.key, 'Team_PlayerLeft', player.get_data_nick_and_id())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -194,6 +193,7 @@ def _validate_is_team_owner(response, player, team):
 def _websocket_notify_team(team_key, event, value):
     for team_player in Player.query(Player.team == team_key).fetch():
         team_player.websocket_notify(event, value)
+
 
 app = webapp2.WSGIApplication([
     (r'/api/teams/register', RegisterHandler),

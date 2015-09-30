@@ -1,10 +1,10 @@
 class EnergyConfig():
-    maxEnergy = 100 # Should be underscored max_energy
-    tickAmount = 5 # Should be underscored
+    max_energy = 100
+    tick_amount = 5
 
 class CashConfig():
-    startingCash = 100 # Should be underscored
-    tickAmount = 5 # Should be underscored
+    starting_cash = 100
+    tick_amount = 5
 
 class BettingConfig():
     betting_window_minutes = 0

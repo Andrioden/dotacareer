@@ -9,21 +9,19 @@ from api.utils import is_hour_in_start_end_time_range_adjusted_for_timezone_offs
 
 class EnergyTickHandler(webapp2.RequestHandler):
     def get(self):
-        for player in Player.query(Player.energy < EnergyConfig.maxEnergy):
-            if player.energy < EnergyConfig.maxEnergy:
-                player.energy = min(EnergyConfig.maxEnergy, player.energy + EnergyConfig.tickAmount)
+        for player in Player.query(Player.energy < EnergyConfig.max_energy):
+            if player.energy < EnergyConfig.max_energy:
+                player.energy = min(EnergyConfig.max_energy, player.energy + EnergyConfig.tick_amount)
                 player.websocket_notify("Player_NewEnergyValue", player.energy)
                 player.put()
 
 
 class CashTickHandler(webapp2.RequestHandler):
     def get(self):
-        players = Player.query()
-
-        for player in players:
-            player.cash += CashConfig.tickAmount
+        for player in Player.query():
+            player.cash += CashConfig.tick_amount
             player.put()
-            player.websocket_notify("Player_CashChange", CashConfig.tickAmount)
+            player.websocket_notify("Player_CashChange", CashConfig.tick_amount)
 
 
 class SoloQueueMatchmakingHandler(webapp2.RequestHandler):

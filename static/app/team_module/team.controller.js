@@ -26,6 +26,10 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
         $rootScope.player.team = null;
         $rootScope.$apply();
     });
+    WebSocketService.subscribe("Team_PlayerLeft", function(player){
+        deleteMember(player.id);
+        $rootScope.$apply();
+    });
 
     // EXPOSED ACTIONS FOR HTML
     $scope.openCreateTeamDialog = function () {
