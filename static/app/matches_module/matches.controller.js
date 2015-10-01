@@ -1,7 +1,5 @@
 app.controller('MatchesController', function($rootScope, $scope, $modal, WebSocketService){
 
-
-
     // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
     $scope.$on('MatchesControllerEvent_OpenMatchDialog', function(event, match) {
         $scope.openMatchDialog(match);
@@ -13,10 +11,6 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
     });
     WebSocketService.subscribe("Match_Finished", function(match){
         addOrExtendMatch(match);
-        $rootScope.$apply();
-    });
-    WebSocketService.subscribe("Match_UpdatedOrNewBet", function(bet){
-        addOrExtendBet(bet);
         $rootScope.$apply();
     });
 
@@ -45,19 +39,6 @@ app.controller('MatchesController', function($rootScope, $scope, $modal, WebSock
         var localMatch = getLocalMatch(match.id);
         if (localMatch) extendObjectWithObject(localMatch, match);
         else $rootScope.player.matches.push(match);
-    }
-
-    function addOrExtendBet(bet) {
-        var localMatch = getLocalMatch(bet.match.id);
-        if (localMatch.bets) {
-            for(var i=0; i<localMatch.bets.length; i++) {
-                if (localMatch.bets[i].id == bet.id) {
-                    extendObjectWithObject(localMatch.bets[i], bet);
-                    return;
-                }
-            }
-            localMatch.bets.push(bet);
-        }
     }
 
 });

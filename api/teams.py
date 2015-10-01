@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import webapp2
 import logging
-import datetime
-import random
+
+from google.appengine.ext import ndb
+
+import webapp2
 from utils import *
 from models import Player, Team, TeamApplication
-from google.appengine.ext import ndb
 
 
 class RegisterHandler(webapp2.RequestHandler):
@@ -63,7 +63,7 @@ class SendApplicationHandler(webapp2.RequestHandler):
             text=request_data['text']
         ).put().get()
 
-        _websocket_notify_team(team_key, 'Team_NewApplication', team_application.get_data())
+        _websocket_notify_team('Team_NewApplication', team_key, "player.team.applications.[%s]" % team_application.key.id(), team_application.get_data())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -85,8 +85,8 @@ class AcceptApplicationHandler(webapp2.RequestHandler):
         applicant.put()
         application.key.delete()
 
-        applicant.websocket_notify('Player_TeamApplicationAccepted', team.get_data("full"))
-        _websocket_notify_team(team.key, 'Team_NewMember', applicant.get_data_nick_and_id())
+        websocket_notify_player("Player_TeamApplicationAccepted", applicant.key, "player", {'team': team.get_data("full")})
+        _websocket_notify_team("Team_NewMember", team.key, None, applicant.get_data_nick_and_id())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -105,7 +105,7 @@ class DeclineApplicationHandler(webapp2.RequestHandler):
         # DO SHIT
         application.key.delete()
 
-        _websocket_notify_team(team.key, 'Team_ApplicationDeclined', application.get_data())
+        _websocket_notify_team("Team_ApplicationDeclined", team.key, "player.team.applications.-[%s]" % application.key.id(), application.get_data())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -114,7 +114,7 @@ class KickMemberHandler(webapp2.RequestHandler):
         request_data = json.loads(self.request.body)
         logging.info(request_data)
         player = current_user_player()
-        kicked_player = Player.get_by_id(int(request_data['player_id']))
+        kicked_player = Player.get_by_id(request_data['player_id'])
         team = kicked_player.team.get()
 
         # VALIDATIONS
@@ -128,8 +128,8 @@ class KickMemberHandler(webapp2.RequestHandler):
         kicked_player.team = None
         kicked_player.put()
 
-        kicked_player.websocket_notify('Player_KickedFromTeam')
-        _websocket_notify_team(team.key, 'Team_KickedMember', kicked_player.get_data_nick_and_id())
+        websocket_notify_player("Player_KickedFromTeam", kicked_player.key, "player", {'team': None})
+        _websocket_notify_team("Team_KickedMember", team.key, "player.team.members.-[%s]" % kicked_player.key.id(), kicked_player.get_data_nick_and_id())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -152,7 +152,7 @@ class LeaveTeamHandler(webapp2.RequestHandler):
         player.team = None
         player.put()
 
-        _websocket_notify_team(team.key, 'Team_PlayerLeft', player.get_data_nick_and_id())
+        _websocket_notify_team("Team_PlayerLeft", team.key, "player.team.members.-[%s]" % player.key.id(), player.get_data_nick_and_id())
         set_json_response(self.response, {'code': "OK"})
 
 
@@ -190,9 +190,9 @@ def _validate_is_team_owner(response, player, team):
         return True
 
 
-def _websocket_notify_team(team_key, event, value):
-    for team_player in Player.query(Player.team == team_key).fetch():
-        team_player.websocket_notify(event, value)
+def _websocket_notify_team(event, team_key, object_path, object):
+    for team_player_key in Player.query(Player.team == team_key).fetch(keys_only=True):
+        websocket_notify_player(event, team_player_key, object_path, object)
 
 
 app = webapp2.WSGIApplication([

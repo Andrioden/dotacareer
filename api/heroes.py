@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import webapp2
-import logging
 from utils import *
 from heroes_metrics import hero_metrics
 

@@ -6,11 +6,11 @@ import logging
 import json
 import random
 import copy
-from google.appengine.api import channel
 import datetime
 from heroes_metrics import get_flat_hero_name_list, hero_metrics
 from simulator.factories import MatchSimulatorFactory
 from simulator.matchsimulator import MatchSimulator  # Imported so PyCharm autocomplete works
+from utils import websocket_notify_player
 
 
 class Player(ndb.Model):
@@ -70,12 +70,11 @@ class Player(ndb.Model):
 
     def get_stats_data(self):
         data = {}
-        for variable_name in self.__dict__['_values'].keys(): # __dict__['_values'] contains all class object variables
+        for variable_name in self.__dict__['_values'].keys():  # __dict__['_values'] contains all class object variables
             if 'stat_' in variable_name:
                 variable_name_minus_stat_ = variable_name.replace('stat_', '')
                 data[variable_name_minus_stat_] = round(getattr(self, variable_name), 1)
         return data
-
 
     def stop_doing(self):
         doing = self.doing.get()
@@ -86,9 +85,6 @@ class Player(ndb.Model):
             return True
         else:
             return "Cant stop doing %s" % doing.what()
-
-    def websocket_notify(self, event, value=None):
-        channel.send_message(self.key.id(), json.dumps({'event': event, 'value': value}))
 
 
 class PlayerHeroStats(ndb.Model):
@@ -108,7 +104,7 @@ class PlayerHeroStats(ndb.Model):
 
     def get_stats_data(self):
         data = {}
-        for variable_name in self.__dict__['_values'].keys(): # __dict__['_values'] contains all class object variables
+        for variable_name in self.__dict__['_values'].keys():  # __dict__['_values'] contains all class object variables
             if 'stat_' in variable_name:
                 variable_name_minus_stat_ = variable_name.replace('stat_', '')
                 data[variable_name_minus_stat_] = round(getattr(self, variable_name), 1)
@@ -198,8 +194,8 @@ class MatchSoloQueue(ndb.Model):
     def _pre_delete_hook(cls, key):
         match_queues = MatchSoloQueue.query(MatchSoloQueue.type == key.get().type)
         match_queues_after_deletion_count = match_queues.count() - 1
-        for match_queue_left in match_queues:
-            match_queue_left.player.get().websocket_notify("Match_NewQueueCount", match_queues_after_deletion_count)
+        for match_queue in match_queues:
+            websocket_notify_player("Match_NewQueueCount", match_queue.player, "player.doing", {'queued': match_queues_after_deletion_count})
 
 
 # noinspection PyAttributeOutsideInit
@@ -244,9 +240,9 @@ class Match(polymodel.PolyModel):
 
         return data
 
-    def websocket_notify_players(self, event, value):
+    def websocket_notify_players(self, event, object_path, object):
         for match_player in MatchPlayer.query(MatchPlayer.match == self.key):
-            match_player.player.get().websocket_notify(event, value)
+            websocket_notify_player(event, match_player.player, object_path, object)
 
     def setup_soloqueue_match(self, players):
         self.date = datetime.datetime.now() + datetime.timedelta(minutes=BettingConfig.betting_window_minutes)

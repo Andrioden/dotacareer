@@ -1,10 +1,11 @@
-import webapp2
-import logging
-from models import Player, Team, TeamMatch, MatchSoloQueue, Match, MatchPlayer
-from google.appengine.ext import ndb
-from gameconfig import EnergyConfig, CashConfig
 import datetime
-from api.utils import is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue
+
+from google.appengine.ext import ndb
+
+import webapp2
+from models import Player, Team, TeamMatch, MatchSoloQueue, Match, MatchPlayer
+from gameconfig import EnergyConfig, CashConfig
+from utils import is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue, websocket_notify_player
 
 
 class EnergyTickHandler(webapp2.RequestHandler):
@@ -12,8 +13,8 @@ class EnergyTickHandler(webapp2.RequestHandler):
         for player in Player.query(Player.energy < EnergyConfig.max_energy):
             if player.energy < EnergyConfig.max_energy:
                 player.energy = min(EnergyConfig.max_energy, player.energy + EnergyConfig.tick_amount)
-                player.websocket_notify("Player_NewEnergyValue", player.energy)
                 player.put()
+                websocket_notify_player("Player_NewEnergyValue", player.key, "player", {'energy': player.energy})
 
 
 class CashTickHandler(webapp2.RequestHandler):
@@ -21,7 +22,7 @@ class CashTickHandler(webapp2.RequestHandler):
         for player in Player.query():
             player.cash += CashConfig.tick_amount
             player.put()
-            player.websocket_notify("Player_CashChange", CashConfig.tick_amount)
+            websocket_notify_player("Player_NewCashValue", player.key, "player", {'cash': player.cash})
 
 
 class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
@@ -39,7 +40,7 @@ class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
             for player in players:
                 player.doing = match.key
                 player.put()
-                player.websocket_notify("Player_MatchFound", match.get_data())
+                websocket_notify_player("Player_MatchFound", player.key, None, match.get_data())
 
 
 class TeamMatchmakingHandler(webapp2.RequestHandler):
@@ -60,7 +61,7 @@ class TeamMatchmakingHandler(webapp2.RequestHandler):
             for player in players:
                 player.doing = match.key
                 player.put()
-                player.websocket_notify("Player_MatchFound", match.get_data())
+                websocket_notify_player("Player_MatchFound", player.key, None, match.get_data())
 
 
 class FinishMatchesHandler(webapp2.RequestHandler):

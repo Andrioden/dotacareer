@@ -1,33 +1,9 @@
 app.controller('TeamController', function ($rootScope, $scope, $http, $modal, WebSocketService) {
 
     // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
-    WebSocketService.subscribe("Team_NewApplication", function(newTeamApplication){
-        $rootScope.player.team.applications.push(newTeamApplication);
-        $rootScope.$apply();
-    });
     WebSocketService.subscribe("Team_NewMember", function(player){
         deleteApplication(player.id);
         $rootScope.player.team.members.push(player);
-        $rootScope.$apply();
-    });
-    WebSocketService.subscribe("Team_ApplicationDeclined", function(application){
-        deleteApplication(application.player.id);
-        $rootScope.$apply();
-    });
-    WebSocketService.subscribe("Team_KickedMember", function(player){
-        deleteMember(player.id);
-        $rootScope.$apply();
-    });
-    WebSocketService.subscribe("Player_TeamApplicationAccepted", function(team){
-        $rootScope.player.team = team;
-        $rootScope.$apply();
-    });
-    WebSocketService.subscribe("Player_KickedFromTeam", function(team){
-        $rootScope.player.team = null;
-        $rootScope.$apply();
-    });
-    WebSocketService.subscribe("Team_PlayerLeft", function(player){
-        deleteMember(player.id);
         $rootScope.$apply();
     });
 
@@ -165,7 +141,7 @@ app.controller('ApplyTeamDialogController', function ($scope, $modalInstance, $h
     $scope.teams = undefined;
 
     // CONSTRUCTOR
-    $http.get('/api/teams/rest/', {cache: true}).
+    $http.get('/api/teams/rest/').
         then(function(response) {
             $scope.teams = response.data;
         }, function(response) {

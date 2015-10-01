@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-import webapp2
 import logging
-from utils import *
-from google.appengine.api import users
-from models import MatchSoloQueue, Match, MatchPlayer, Bet
 from google.appengine.ext import ndb
+import webapp2
+from utils import *
+from models import MatchSoloQueue, Match, MatchPlayer, Bet
 
 
 class JoinSoloQueueHandler(webapp2.RequestHandler):
@@ -39,7 +38,7 @@ class JoinSoloQueueHandler(webapp2.RequestHandler):
         all_match_queues = MatchSoloQueue.query(MatchSoloQueue.type == match_queue_type)
         all_match_queues_count = all_match_queues.count()
         for match_queue in all_match_queues:
-            match_queue.player.get().websocket_notify("Match_NewQueueCount", all_match_queues_count)
+            websocket_notify_player("Match_NewQueueCount", match_queue.player, "player.doing", {'queued': all_match_queues_count})
 
 
 class PlayAgainstBotsHandler(webapp2.RequestHandler):
@@ -98,7 +97,8 @@ class BetHandler(webapp2.RequestHandler):
         player.cash -= bet_value_dif
         player.put()
 
-        match.websocket_notify_players("Match_UpdatedOrNewBet", bet.get_data())
+        client_object_path = "player.matches.[%s].bets.[%s]" % (match_key.id(), bet.key.id())
+        match.websocket_notify_players("Match_UpdatedOrNewBet", client_object_path, bet.get_data())
         set_json_response(self.response, {'bet': bet.get_data(), 'cash': player.cash})
 
 

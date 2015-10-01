@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import webapp2
-import json
 import logging
+
+from google.appengine.api import users
+from google.appengine.ext import ndb
+
+import webapp2
 from utils import *
 from models import Player, PlayerConfig
-from google.appengine.api import users
 from heroes_metrics import is_valid_hero_name
 from player_class_metrics import player_class_metrics, is_valid_player_class_name
-from google.appengine.ext import ndb
 
 
 class RegisterHandler(webapp2.RequestHandler):

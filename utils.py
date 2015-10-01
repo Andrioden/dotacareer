@@ -1,8 +1,9 @@
 import json
 from google.appengine.api import users
-from models import Player
 import datetime
 from google.appengine.ext import ndb
+from google.appengine.api import channel
+
 
 def error_400(response, code, message):
     response.headers['Content-Type'] = 'application/json'
@@ -40,7 +41,37 @@ def set_json_response(response, data):
 
 def current_user_player():
     user = users.get_current_user()
-    return ndb.Key(Player, user.user_id()).get()
+    return ndb.Key('Player', user.user_id()).get()  # I use 'Player' because it allows me not to import Player from models, which again avoids a looped import
+
+
+def websocket_notify_player(event, player_key, object_path, object):
+    """
+    Notifies an specific player of a new event and possible local/javascript data that should be updated. Yes this means that
+    the server has control over the client data. This increases the coupling between server-client which is an acceptable tradeoff for less code.
+
+    :param event: Tag identifier named in the format [EntityInFocus]_[Action]. The best example to illustrate this is what was previously called
+    "MatchFound" and "MatchFinished" which are now
+        "Player_MatchFound"  - Because it is the players that is in focus and that is targeted by the notification.
+        "Match_Finished" - Because its the match related players that are targeted by the notification.
+
+    :param player_key:
+
+    :param object_path: The javascript object path. Has to be on the angularjs $rootScope. Examples:
+        Update single value (cash):
+            "player" with object {'cash': 100}
+        Update object:
+            "player.team" with object {'name': "New team name", 'applications': []}
+        Update/add item to array:
+            "player.team.applications.[2131231231231]" with object. Updates if id 2131231231231 is found in array. Adds otherwise.
+        Delete item from array:
+            "player.team.applications.-[2131231231231]". Also with object because an controller might want to subscribe to the event and use the object data.
+
+    :param object: Has to be a dict
+
+    For full examples search the code for "websocket_notify_player"
+
+    """
+    channel.send_message(player_key.id(), json.dumps({'event': event, 'object_path': object_path, 'object': object}))
 
 
 def is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue(start_hour, end_hour, check_hour):
