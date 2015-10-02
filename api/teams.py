@@ -139,11 +139,11 @@ class LeaveTeamHandler(webapp2.RequestHandler):
         team = player.team.get()
 
         # DO SHIT
-        players_query = Player.query(Player.team == team.key)  # Needs to be Player.query(Player.team == team.key, Player.key != player.key)
+        players_query = Player.query(Player.team == team.key, Player.key != player.key)
 
         if players_query.count() > 1:
             if team.owner == player.key:
-                new_team_leader = players_query.get()  # In theory the previous owner can become the owner again
+                new_team_leader = players_query.get()
                 team.owner = new_team_leader.key
                 team.put()
         elif players_query.count() == 1:
