@@ -146,12 +146,13 @@ class LeaveTeamHandler(webapp2.RequestHandler):
         # DO SHIT
         players_query = Player.query(Player.team == team.key, Player.key != player.key)
 
-        if players_query.count() > 1:
+        if players_query.count() > 0:
             if team.owner == player.key:
                 new_team_leader = players_query.get()
                 team.owner = new_team_leader.key
                 team.put()
-        elif players_query.count() == 1:
+                _websocket_notify_team("Team_OwnerChanged", team.key, "player.team", {'owner': new_team_leader.get_data_nick_and_id()})
+        elif players_query.count() == 0:
             team.key.delete()
 
         player.team = None
