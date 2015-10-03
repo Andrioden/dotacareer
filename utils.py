@@ -60,7 +60,7 @@ def websocket_notify_player(event, player_key, object_path, object):
         Update single value (cash):
             "player" with object {'cash': 100}
         Update object:
-            "player.team" with object {'name': "New team name", 'applications': []}
+            "player" with object {'team': team_data}
         Update/add item to array:
             "player.team.applications.[2131231231231]" with object. Updates if id 2131231231231 is found in array. Adds otherwise.
         Delete item from array:

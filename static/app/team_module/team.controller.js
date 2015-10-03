@@ -2,8 +2,8 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
 
     // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
     WebSocketService.subscribe("Team_NewMember", function(player){
+        // Adding the player to the current member list is done through the object path system
         deleteApplication(player.id);
-        $rootScope.player.team.members.push(player);
         $rootScope.$apply();
     });
 

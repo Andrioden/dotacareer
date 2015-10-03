@@ -85,8 +85,13 @@ class AcceptApplicationHandler(webapp2.RequestHandler):
         applicant.put()
         application.key.delete()
 
-        websocket_notify_player("Player_TeamApplicationAccepted", applicant.key, "player", {'team': team.get_data("full")})
-        _websocket_notify_team("Team_NewMember", team.key, None, applicant.get_data_nick_and_id())
+        _websocket_notify_team("Team_NewMember", team.key, "player.team.members.[%s]" % applicant.key.id(), applicant.get_data_nick_and_id())
+
+        # Because how this transaction work, we manualy add the player itself as a member of the team
+        team_data = team.get_data("full")
+        team_data['members'].append(applicant.get_data_nick_and_id())
+        websocket_notify_player("Player_TeamApplicationAccepted", applicant.key, "player", {'team': team_data})
+
         set_json_response(self.response, {'code': "OK"})
 
 
