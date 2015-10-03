@@ -98,7 +98,7 @@ class BetHandler(webapp2.RequestHandler):
         player.put()
 
         client_object_path = "player.matches.[%s].bets.[%s]" % (match_key.id(), bet.key.id())
-        match.websocket_notify_players("Match_UpdatedOrNewBet", client_object_path, bet.get_data())
+        match.websocket_notify_players("Match_UpdatedOrNewBet", client_object_path, bet.get_data(), player.key)
         set_json_response(self.response, {'bet': bet.get_data(), 'cash': player.cash})
 
 

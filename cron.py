@@ -72,7 +72,7 @@ class FinishMatchesHandler(webapp2.RequestHandler):
                 player = match_player.player.get()
                 player.doing = None
                 player.put()
-                player.websocket_notify("Match_Finished", match.get_data("full"))
+                websocket_notify_player("Match_Finished", player.key, None, match.get_data("full"))
 
 
 app = webapp2.WSGIApplication([

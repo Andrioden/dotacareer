@@ -240,9 +240,10 @@ class Match(polymodel.PolyModel):
 
         return data
 
-    def websocket_notify_players(self, event, object_path, object):
+    def websocket_notify_players(self, event, object_path, object, filter_player_key=None):
         for match_player in MatchPlayer.query(MatchPlayer.match == self.key):
-            websocket_notify_player(event, match_player.player, object_path, object)
+            if not match_player.player == filter_player_key:
+                websocket_notify_player(event, match_player.player, object_path, object)
 
     def setup_soloqueue_match(self, players):
         self.date = datetime.datetime.now() + datetime.timedelta(minutes=BettingConfig.betting_window_minutes)
