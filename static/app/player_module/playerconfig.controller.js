@@ -1,4 +1,4 @@
-app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $modalInstance, $http) {
+app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $modalInstance, $http, $timeout) {
     // IMPORTANT CONTROLLER VARIABLES
     $scope._selectedConfigIdTempStorage = null; // Only used as the ng-model the config selector should point to, should not be used.
     $scope.selectedConfig = null;
@@ -6,6 +6,10 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
 
     // CONSTRUCTOR
     setActiveConfigAsSelectedConfig();
+    // Timeout needed to redraw the sliders because of limitations of the slider plugin (https://github.com/rzajac/angularjs-slider/issues/79)
+    $timeout(function () {
+        $scope.$broadcast('rzSliderForceRender');
+    });
 
     $http.get('/api/heroes/rest/', {cache: true}).
         then(function(response) {
@@ -43,6 +47,14 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
                 return;
             }
         }
+    }
+
+    $scope.translateTrollLevelToText = function(value) {
+        if (typeof value  !== "undefined") return ["None", "Derp", "Much Troll", "Attempt at master trolling"][value];
+    }
+
+    $scope.translateFlameLevelToText = function(value) {
+        if (typeof value  !== "undefined") return ["None", "Mental poking", "Leave no fault uncommented", "Rager"][value];
     }
 
     $scope.isDoingConfigAction = false;

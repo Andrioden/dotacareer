@@ -82,7 +82,6 @@ class Player(ndb.Model):
             self.doing.delete()
             self.doing = None
             self.put()
-            return True
         else:
             return "Cant stop doing %s" % doing.what()
 
@@ -115,8 +114,10 @@ class PlayerConfig(ndb.Model):
     player = ndb.KeyProperty(kind=Player)
     name = ndb.StringProperty(default="New config")
     active = ndb.BooleanProperty(default=False)
+    troll_level = ndb.IntegerProperty(default=0, choices=[0, 1, 2, 3])
+    flame_level = ndb.IntegerProperty(default=0, choices=[0, 1, 2, 3])
     """
-    Hero priorities is a ordered list with dicts in the following format:
+    Hero priorities is an ordered list with dicts in the following format:
     {
         'role': string,
         'name': string
@@ -129,6 +130,8 @@ class PlayerConfig(ndb.Model):
             'id': self.key.id(),
             'name': self.name,
             'active': self.active,
+            'troll_level': self.troll_level,
+            'flame_level': self.flame_level,
             'hero_priorities': self.hero_priorities if self.hero_priorities else []
         }
 

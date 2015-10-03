@@ -80,7 +80,7 @@ class StopDoingHandler(webapp2.RequestHandler):
         player = current_user_player()
 
         stop_doing_result = player.stop_doing()
-        if stop_doing_result != True:
+        if stop_doing_result:
             error_400(self.response, "ERROR_CANT_STOP_DOING", stop_doing_result)
             return
 
@@ -113,11 +113,14 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         # UPDATE
         config.name = request_data['name']
         config.hero_priorities = updated_hero_priorities
+        config.troll_level = request_data['troll_level']
+        config.flame_level = request_data['flame_level']
         config.put()
 
         set_json_response(self.response, {'code': "OK"})
 
-    def _hero_priorities_cleaned_for_empty(self, hero_priorities):
+    @staticmethod
+    def _hero_priorities_cleaned_for_empty(hero_priorities):
         return [h for h in hero_priorities if (h["name"] or h["role"])]
 
     def _validate_hero_priorities(self, hero_priorities):
