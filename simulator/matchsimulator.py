@@ -30,8 +30,8 @@ class MatchSimulator:
             if sim_player.db_player:
                 # Skill
                 outcome = random.uniform(-0.2, 1.0)
-                self.logs.append("%s stat outcome for '%s': %s" % (sim_player.name, "skill", outcome))
-                sim_player.stat_outcomes.append(StatOutcome("skill", outcome))
+                self.logs.append("%s stat outcome for '%s': %s" % (sim_player.name, "stat_skill", outcome))
+                sim_player.stat_outcomes.append(StatOutcome("stat_skill", outcome))
 
                 # Hero overall
                 outcome = random.uniform(-0.2, 1.0)

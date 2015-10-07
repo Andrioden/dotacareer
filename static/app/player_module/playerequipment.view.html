@@ -1,0 +1,20 @@
+<script type="text/ng-template" id="playerEquipmentDialog.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Equipment</h3>
+    </div>
+    <div class="modal-body">
+        <button ng-repeat="equipment in equipments | orderBy:['cost']" class="btn btn-default">
+            <div>{{equipment.name}}: ${{equipment.cost}}</div>
+            <div>
+                <ul>
+                    <li ng-repeat="(name, value) in equipment.stat_modifiers">
+                        <span class="stats_color capitalized">{{name.replace('stat_', '')}}: </span><span>+{{value}}</span>
+                    </li>
+                </ul>
+            </div>
+        </button>
+    </div>
+    <div class="modal-footer">
+        <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
+    </div>
+</script>

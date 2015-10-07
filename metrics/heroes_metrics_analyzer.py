@@ -1,4 +1,4 @@
-from heroes_metrics import hero_metrics
+from heroes import hero_metrics
 import json
 import operator
 

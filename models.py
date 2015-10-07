@@ -1,26 +1,24 @@
+import logging
+import random
+import datetime
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
-import random
 from gameconfig import EnergyConfig, CashConfig, BettingConfig
-import logging
-import json
-import random
-import copy
-import datetime
-from heroes_metrics import get_flat_hero_name_list, hero_metrics
+from metrics.heroes import get_flat_hero_name_list, hero_metrics
+from metrics.equipment import get_flat_equipment_name_list
 from simulator.factories import MatchSimulatorFactory
-from simulator.matchsimulator import MatchSimulator  # Imported so PyCharm autocomplete works
 from utils import websocket_notify_player
 
 
 class Player(ndb.Model):
     nick = ndb.StringProperty(required=True)
     nick_lower = ndb.ComputedProperty(lambda self: self.nick.lower())
-    skill = ndb.FloatProperty(required=True)
     team = ndb.KeyProperty(kind='Team')
     doing = ndb.KeyProperty(default=None)
     energy = ndb.IntegerProperty(default=EnergyConfig.max_energy)
     cash = ndb.FloatProperty(default=CashConfig.starting_cash)
+    equipment_mouse = ndb.StringProperty(choices=get_flat_equipment_name_list('mouse'))
+    stat_skill = ndb.FloatProperty(default=10.0)
     stat_mid = ndb.FloatProperty(default=0)
     stat_offlane = ndb.FloatProperty(default=0)
     stat_support = ndb.FloatProperty(default=0)
@@ -46,7 +44,6 @@ class Player(ndb.Model):
         data = {
             'id': self.key.id(),
             'nick': self.nick,
-            'skill': int(self.skill),
             'team': self.team.get().get_data(detail_level) if self.team else None,
             'doing': self.doing.get().get_data() if self.doing else None,
             'energy': self.energy,

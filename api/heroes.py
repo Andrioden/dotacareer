@@ -2,7 +2,7 @@
 
 import webapp2
 from utils import *
-from heroes_metrics import hero_metrics
+from metrics.heroes import hero_metrics
 
 
 class HeroesHandler(webapp2.RequestHandler):

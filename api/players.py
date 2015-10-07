@@ -2,14 +2,12 @@
 
 import logging
 
-from google.appengine.api import users
-from google.appengine.ext import ndb
-
 import webapp2
 from utils import *
 from models import Player, PlayerConfig
-from heroes_metrics import is_valid_hero_name
-from player_class_metrics import player_class_metrics, is_valid_player_class_name
+from metrics.heroes import is_valid_hero_name
+from metrics.player_class import player_class_metrics, is_valid_player_class_name
+from metrics.equipment import equipment_metrics
 
 
 class RegisterHandler(webapp2.RequestHandler):
@@ -35,8 +33,7 @@ class RegisterHandler(webapp2.RequestHandler):
         # REGISTER PLAYER
         new_player = Player(
             id=user.user_id(),
-            nick=request_data['nick'],
-            skill=10.0
+            nick=request_data['nick']
         )
 
         for player_class in player_class_metrics:
@@ -177,6 +174,11 @@ class SetActiveConfigHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
+class EquipmentsHandler(webapp2.RequestHandler):
+    def get(self):
+        set_json_response(self.response, equipment_metrics)
+
+
 app = webapp2.WSGIApplication([
     (r'/api/players/register', RegisterHandler),
     (r'/api/players/my', MyHandler),
@@ -185,4 +187,5 @@ app = webapp2.WSGIApplication([
     (r'/api/players/updateConfig', UpdateConfigHandler),
     (r'/api/players/deleteConfig', DeleteConfigHandler),
     (r'/api/players/setActiveConfig', SetActiveConfigHandler),
+    (r'/api/players/equipments', EquipmentsHandler),
 ], debug=True)

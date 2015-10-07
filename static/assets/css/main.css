@@ -65,6 +65,10 @@ h1 {
    color: #c33d2b;
 }
 
+.capitalized {
+    text-transform: capitalize;
+}
+
 /***** Player ******/
 
 .player_class_box {

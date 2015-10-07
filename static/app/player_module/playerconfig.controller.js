@@ -50,11 +50,13 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
     }
 
     $scope.translateTrollLevelToText = function(value) {
-        if (typeof value  !== "undefined") return ["None", "Derp", "Much Troll", "Attempt at master trolling"][value];
+        if (value == null) return "None";
+        else if (typeof value  !== "undefined") return ["None", "Derp", "Much Troll", "Attempt at master trolling"][value];
     }
 
     $scope.translateFlameLevelToText = function(value) {
-        if (typeof value  !== "undefined") return ["None", "Mental poking", "Leave no fault uncommented", "Rager"][value];
+        if (value == null) return "None";
+        else if (typeof value  !== "undefined") return ["None", "Mental poking", "Leave no fault uncommented", "Rager"][value];
     }
 
     $scope.isDoingConfigAction = false;

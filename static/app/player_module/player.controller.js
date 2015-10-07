@@ -96,6 +96,14 @@ app.controller('PlayerController', function($rootScope, $scope, $http, $modal, W
         });
     }
 
+    $scope.openPlayerEquipmentDialog = function() {
+        var modalInstance = $modal.open({
+            animation: true,
+            templateUrl: 'playerEquipmentDialog.html',
+            controller: 'PlayerEquipmentDialogController',
+        });
+    }
+
     // PRIVATE METHODS
 
 });

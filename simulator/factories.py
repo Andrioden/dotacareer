@@ -21,7 +21,7 @@ class MatchSimulatorFactory:
                 sim_player = MatchSimulatorPlayer(combatant.nick, combatant.hero, DEFAULT_BOT_SKILL, None, None)
             else:
                 player = combatant.player.get()
-                sim_player = MatchSimulatorPlayer(player.nick, combatant.hero, player.skill, combatant, player)
+                sim_player = MatchSimulatorPlayer(player.nick, combatant.hero, player.stat_skill, combatant, player)
 
             if combatant.faction == "Dire":
                 dire.append(sim_player)

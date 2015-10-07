@@ -7,7 +7,7 @@ player_class_metrics = [
     {
         'name': 'Flamer',
         'description': 'This player has a tendency to flame his opponents, but this also increases his chance of flaming his own teammates. More resistant to flame and trolling than others.',
-        'stat_modifiers':  {
+        'stat_modifiers': {
             'stat_flaming': 10.0,
             'stat_resistance_flaming': 3.0,
             'stat_resistance_trolling': 3.0
