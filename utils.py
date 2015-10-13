@@ -28,7 +28,7 @@ def unauthorized_401(response, code, message):
 
 def validate_request_data(response, request_data, list_of_dict_keys):
     for key in list_of_dict_keys:
-        if not request_data.get(key, False):
+        if request_data.get(key, None) is None:
             error_400(response, "VALIDATION_ERROR_MISSING_DATA", "The request data is missing the input value '%s'" % key)
             return False
     return True

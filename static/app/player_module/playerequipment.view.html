@@ -1,18 +1,28 @@
 <script type="text/ng-template" id="playerEquipmentDialog.html">
     <div class="modal-header">
-        <h3 class="modal-title">Equipment</h3>
+        <h3 class="modal-title">Equipment - Shop and Equip</h3>
     </div>
     <div class="modal-body">
-        <button ng-repeat="equipment in equipments | orderBy:['cost']" class="btn btn-default">
-            <div>{{equipment.name}}: ${{equipment.cost}}</div>
-            <div>
-                <ul>
-                    <li ng-repeat="(name, value) in equipment.stat_modifiers">
-                        <span class="stats_color capitalized">{{name.replace('stat_', '')}}: </span><span>+{{value}}</span>
-                    </li>
-                </ul>
-            </div>
-        </button>
+        <span ng-repeat="equipment in shopEquipmentList | orderBy:['type', 'cost']">
+            <br ng-if="equipment.cheapest_of_type && $index != 0" />
+            <br ng-if="equipment.cheapest_of_type && $index != 0" />
+            <h4 ng-if="equipment.cheapest_of_type" class="capitalized">{{equipment.type}}</h4>
+            <button class="btn" ng-class="equipmentButtonClass(equipment)" ng-click="equipmentClick(equipment)" ng-disabled="player.cash < equipment.cost">
+                <div>{{equipment.name}}: ${{equipment.cost}}</div>
+                <div>
+                    <ul>
+                        <li ng-repeat="(name, value) in equipment.stat_modifiers">
+                            <span class="stats_color capitalized">{{name.replace('stat_', '')}}: </span><span>+{{value}} {{owned}}</span>
+                        </li>
+                    </ul>
+                </div>
+            </button>
+        </span>
+        <br />
+        <br />
+        <div>
+            <span><b>Legend:</b></span> <span style="color: #fff;">Can buy</span> - <span style="color: #ccc;">Can't afford</span> - <span style="color: #265a88;">Owns</span> - <span style="color: #419641;">Equipped</span>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>

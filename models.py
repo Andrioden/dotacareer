@@ -17,7 +17,6 @@ class Player(ndb.Model):
     doing = ndb.KeyProperty(default=None)
     energy = ndb.IntegerProperty(default=EnergyConfig.max_energy)
     cash = ndb.FloatProperty(default=CashConfig.starting_cash)
-    equipment_mouse = ndb.StringProperty(choices=get_flat_equipment_name_list('mouse'))
     stat_skill = ndb.FloatProperty(default=10.0)
     stat_mid = ndb.FloatProperty(default=0)
     stat_offlane = ndb.FloatProperty(default=0)
@@ -57,7 +56,8 @@ class Player(ndb.Model):
                 'matches': matches_data,
                 'configs': [config.get_data() for config in PlayerConfig.query(PlayerConfig.player == self.key)],
                 'hero_stats': [hero_stats.get_data() for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == self.key)],
-                'stats': self.get_stats_data()
+                'stats': self.get_stats_data(),
+                'equipment': [equipment.get_data() for equipment in OwnedEquipment.query(OwnedEquipment.player == self.key)],
             })
 
         return data
@@ -81,6 +81,19 @@ class Player(ndb.Model):
             self.put()
         else:
             return "Cant stop doing %s" % doing.what()
+
+
+class OwnedEquipment(ndb.Model):
+    player = ndb.KeyProperty(kind=Player, required=True)
+    name = ndb.StringProperty(required=True)
+    type = ndb.StringProperty(required=True)  # Stored as well so we can query if equipment of type already is equipped.
+    is_equipped = ndb.BooleanProperty(default=False)
+
+    def get_data(self):
+        return {
+            'name': self.name,
+            'is_equipped': self.is_equipped
+        }
 
 
 class PlayerHeroStats(ndb.Model):

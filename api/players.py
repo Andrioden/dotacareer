@@ -4,10 +4,10 @@ import logging
 
 import webapp2
 from utils import *
-from models import Player, PlayerConfig
+from models import Player, PlayerConfig, OwnedEquipment
 from metrics.heroes import is_valid_hero_name
 from metrics.player_class import player_class_metrics, is_valid_player_class_name
-from metrics.equipment import equipment_metrics
+from metrics.equipment import equipment_metrics, get_equipment_from_name
 
 
 class RegisterHandler(webapp2.RequestHandler):
@@ -174,9 +174,68 @@ class SetActiveConfigHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'code': "OK"})
 
 
-class EquipmentsHandler(webapp2.RequestHandler):
+class ShopEquipmentListHandler(webapp2.RequestHandler):
     def get(self):
         set_json_response(self.response, equipment_metrics)
+
+
+class BuyEquipmentHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        logging.info(request_data)
+        player = current_user_player()
+        equipment_to_buy = get_equipment_from_name(request_data['equipment_name'])
+
+        # VALIDATION
+        if OwnedEquipment.query(OwnedEquipment.player == player.key, OwnedEquipment.name == equipment_to_buy['name']).count() > 0:
+            error_400(self.response, "ERROR_HAVE_EQUIPMENT", "You already have the item '%s'." % equipment_to_buy['name'])
+            return
+        if equipment_to_buy['cost'] > player.cash:
+            error_400(self.response, "ERROR_NOT_ENOUGH_CASH", "Cant afford item. You have %s, the cost is %s" % (player.cash, equipment_to_buy['cost']))
+            return
+
+        # BUY
+        new_equipment = OwnedEquipment(
+            player=player.key,
+            name=equipment_to_buy['name'],
+            type=equipment_to_buy['type']
+        ).put().get()
+
+        player.cash -= equipment_to_buy['cost']
+        player.put()
+
+        set_json_response(self.response, new_equipment.get_data())
+
+
+class SetEquippedStateHandler(webapp2.RequestHandler):
+    def post(self):
+        request_data = json.loads(self.request.body)
+        logging.info(request_data)
+        player = current_user_player()
+        equipment = get_equipment_from_name(request_data['equipment_name'])
+
+        owned_equipment = OwnedEquipment.query(OwnedEquipment.player == player.key, OwnedEquipment.name == equipment['name']).get()
+
+        # VALIDATE
+        if not validate_request_data(self.response, request_data, ['value']):
+            return
+        if not owned_equipment:
+            error_400(self.response, "ERROR_EQUIPMENT_NOT_FOUND", "Does not seem like you own this equipment '%s'" % equipment['name'])
+            return
+
+        if request_data['value']:
+            has_equipped_of_type = OwnedEquipment.query(OwnedEquipment.player == player.key, OwnedEquipment.type == equipment['type'], OwnedEquipment.is_equipped == True).count() > 0
+            if has_equipped_of_type:
+                error_400(self.response, "ERROR_EQUIPPED_OF_TYPE", "You already equipped an equipment of type '%s'" % equipment['type'])
+                return
+            else:
+                owned_equipment.is_equipped = True
+        else:
+            owned_equipment.is_equipped = False
+
+        owned_equipment.put()
+
+        set_json_response(self.response, {'code': "OK"})
 
 
 app = webapp2.WSGIApplication([
@@ -187,5 +246,7 @@ app = webapp2.WSGIApplication([
     (r'/api/players/updateConfig', UpdateConfigHandler),
     (r'/api/players/deleteConfig', DeleteConfigHandler),
     (r'/api/players/setActiveConfig', SetActiveConfigHandler),
-    (r'/api/players/equipments', EquipmentsHandler),
+    (r'/api/players/shopEquipmentList', ShopEquipmentListHandler),
+    (r'/api/players/buyEquipment', BuyEquipmentHandler),
+    (r'/api/players/setEquippedState', SetEquippedStateHandler),
 ], debug=True)
