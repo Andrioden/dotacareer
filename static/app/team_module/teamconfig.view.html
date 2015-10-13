@@ -3,16 +3,19 @@
         <h3 class="modal-title">Team config</h3>
     </div>
     <div class="modal-body">
-        <label>
+        <h4>
             Ranked local play time
             <span popover-placement="bottom" popover-trigger="mouseenter" popover="The selected hour range decide what (local) time your team may be matched with other teams for ranked team matches. Set them equal to opt-out."> (?)</span>
             <span ng-show="rankedTime.start_hour == rankedTime.end_hour">(off, drag sliders to turn on)</span>
-        </label>
+        </h4>
         <rzslider rz-slider-floor="0" rz-slider-ceil="24" rz-slider-model="rankedTime.start_hour" rz-slider-high="rankedTime.end_hour" rz-slider-translate="translateHoursToPrettyHours"></rzslider>
-
         <br/>
         <br/>
-        <label>Player configs and stats</label>
+        <br/>
+        <h4>
+            Player configs and stats
+            <span popover-trigger="mouseenter" popover="Look at all this beautiful data, sit down, grab a pack of chips and decide what role each player should have for team matches."> (?)</span>
+        </h4>
         <table class="table">
             <thead>
             <tr>
