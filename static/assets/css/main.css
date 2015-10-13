@@ -22,8 +22,12 @@
     margin-bottom: 10px;
 }
 
-.error {
+.red {
     color: red;
+}
+
+.green {
+    color: green;
 }
 
 *[popover] {

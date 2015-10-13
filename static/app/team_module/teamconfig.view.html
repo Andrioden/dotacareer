@@ -9,6 +9,43 @@
             <span ng-show="rankedTime.start_hour == rankedTime.end_hour">(off, drag sliders to turn on)</span>
         </label>
         <rzslider rz-slider-floor="0" rz-slider-ceil="24" rz-slider-model="rankedTime.start_hour" rz-slider-high="rankedTime.end_hour" rz-slider-translate="translateHoursToPrettyHours"></rzslider>
+
+        <br/>
+        <br/>
+        <label>Player configs and stats</label>
+        <table class="table">
+            <thead>
+            <tr>
+                <th ng-repeat="member in player.team.members | orderBy:'nick'">{{member.nick}}</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr>
+                <td class="small" ng-repeat="member in player.team.members | orderBy:'nick'">
+                    <div ng-repeat="hero_priority in member.config.hero_priorities | orderBy:'-stat'">
+                        <span ng-show="hero_priority.stat > 0" class="green">+{{hero_priority.stat}}</span>
+                        <span ng-show="hero_priority.stat < 0" class="red">{{hero_priority.stat}}</span>
+                        <span>{{hero_priority.name}} as {{hero_priority.role}}</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="small" ng-repeat="member in player.team.members | orderBy:'nick'">
+                    <div ng-show="member.config">Troll: {{member.config.troll_level}}</div>
+                    <div ng-show="member.config">Flame: {{member.config.flame_level}}</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="small" ng-repeat="member in player.team.members | orderBy:'nick'">
+                    <div ng-repeat="(name, value) in member.stats">
+                        <span class="stats_color capitalized">{{name}}:</span>
+                        <span class="">{{value}}</span>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
     <div class="modal-footer">
         <button type="button" ng-click="update()" class="btn btn-primary" ng-disabled="isDoingConfigAction || (player.id != player.team.owner.id)" title="Only team owner can update">Update</button>

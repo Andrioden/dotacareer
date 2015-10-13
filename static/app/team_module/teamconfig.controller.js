@@ -12,6 +12,8 @@ app.controller('TeamConfigDialogController', function ($rootScope, $scope, $moda
         $scope.$broadcast('rzSliderForceRender');
     });
 
+    if (!hasFullMembersData()) loadFullMembersData();
+
 
     // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
     $scope.cancel = function () {
@@ -42,6 +44,19 @@ app.controller('TeamConfigDialogController', function ($rootScope, $scope, $moda
 
     function getTimezoneOffsetHours() {
         return (new Date()).getTimezoneOffset() / 60;
+    }
+
+    function hasFullMembersData() {
+        return $rootScope.player.team.members[0].stats != undefined;
+    }
+
+    function loadFullMembersData() {
+        $http.get('/api/teams/fullMembersData').
+            then(function(response) {
+                $rootScope.player.team.members = response.data;
+            }, function(response) {
+                alertError(response);
+            });
     }
 
 });

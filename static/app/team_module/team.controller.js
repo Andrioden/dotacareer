@@ -87,6 +87,7 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
             animation: true,
             templateUrl: 'teamConfigDialog.html',
             controller: 'TeamConfigDialogController',
+            size: 'lg'
         });
     }
 

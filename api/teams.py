@@ -37,6 +37,12 @@ class RegisterHandler(webapp2.RequestHandler):
         set_json_response(self.response, {'team': new_team.get_data('full')})
 
 
+class FullMembersDataHandler(webapp2.RequestHandler):
+    def get(self):
+        player = current_user_player()
+        set_json_response(self.response, Team.get_members_data(player.team, "full"))
+
+
 class TeamsHandler(webapp2.RequestHandler):
     def get(self):
         set_json_response(self.response, [team.get_data() for team in Team.query().fetch()])
@@ -203,6 +209,7 @@ def _websocket_notify_team(event, team_key, object_path, object):
 
 app = webapp2.WSGIApplication([
     (r'/api/teams/register', RegisterHandler),
+    (r'/api/teams/fullMembersData', FullMembersDataHandler),
     (r'/api/teams/rest/', TeamsHandler),
     (r'/api/teams/sendApplication', SendApplicationHandler),
     (r'/api/teams/acceptApplication', AcceptApplicationHandler),

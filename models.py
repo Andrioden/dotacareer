@@ -166,10 +166,47 @@ class Team(ndb.Model):
                     'end_hour': self.ranked_end_hour,
                 },
                 'applications': [team_app.get_data() for team_app in TeamApplication.query(TeamApplication.team == self.key)],
-                'members': [player.get_data_nick_and_id() for player in Player.query(Player.team == self.key)]
+                'members': self.get_members_data(self.key, "simple")
             })
 
         return data
+
+    @staticmethod
+    def get_members_data(team_key, detail_level="simple"):
+        """ Method is static to allow it to be used without getting team data. Performance. """
+        members_data = []
+        for player in Player.query(Player.team == team_key):
+            player_data = {
+                'id': player.key.id(),
+                'nick': player.nick,
+            }
+            if detail_level == "full":
+                player_data.update({
+                    'stats': player.get_stats_data(),
+                    'config': Team._get_active_player_config_data(player)
+                })
+            members_data.append(player_data)
+
+        return members_data
+
+    @staticmethod
+    def _get_active_player_config_data(player):
+        player_config = player.get_active_player_config()
+        if player_config:
+            # First cache all the players heroes stats
+            heroes_stats = [hero_stats for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == player.key)]
+
+            # Then loop trough the hero priorities
+            player_config_data = player_config.get_data()
+            for hero_priority in player_config_data['hero_priorities']:
+                # Merge the heroes stats with the hero priority
+                hero_priority['stat'] = 0.0
+                for hero_stats in heroes_stats:
+                    if hero_priority['name'] == hero_stats.hero:
+                        hero_priority['stat'] = round(hero_stats.stat_overall + getattr(hero_stats, "stat_" + hero_priority['role']), 1)
+            return player_config_data
+        else:
+            return player_config
 
 
 class TeamApplication(ndb.Model):
