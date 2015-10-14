@@ -175,6 +175,8 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         team = player.team.get()
 
         # VALIDATIONS
+        if not validate_request_data(self.response, request_data, ['ranked_start_hour', 'ranked_end_hour', 'members_role']):
+            return
         if not _validate_is_team_owner(self.response, player, team):
             return
 
@@ -182,6 +184,11 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         team.ranked_start_hour = int(request_data['ranked_start_hour'])
         team.ranked_end_hour = int(request_data['ranked_end_hour'])
         team.put()
+
+        for member_role in request_data['members_role']:
+            member = Player.get_by_id(member_role['id'])
+            member.team_role = member_role['role']
+            member.put()
 
         set_json_response(self.response, {'code': "OK"})
 

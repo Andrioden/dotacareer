@@ -14,6 +14,7 @@ class Player(ndb.Model):
     nick = ndb.StringProperty(required=True)
     nick_lower = ndb.ComputedProperty(lambda self: self.nick.lower())
     team = ndb.KeyProperty(kind='Team')
+    team_role = ndb.StringProperty(choices=['Carry', 'Mid', 'Offlane', 'Support', ''], default='')
     doing = ndb.KeyProperty(default=None)
     energy = ndb.IntegerProperty(default=EnergyConfig.max_energy)
     cash = ndb.FloatProperty(default=CashConfig.starting_cash)
@@ -179,6 +180,7 @@ class Team(ndb.Model):
             player_data = {
                 'id': player.key.id(),
                 'nick': player.nick,
+                'role': player.team_role
             }
             if detail_level == "full":
                 player_data.update({

@@ -19,7 +19,16 @@
         <table class="table">
             <thead>
             <tr>
-                <th ng-repeat="member in player.team.members | orderBy:'nick'">{{member.nick}}</th>
+                <th ng-repeat="member in player.team.members | orderBy:'nick'">
+                    <span>{{member.nick}}:</span>
+                    <select ng-model="member.role">
+                        <option value=""></option>
+                        <option value="Carry">Carry</option>
+                        <option value="Mid">Mid</option>
+                        <option value="Offlane">Offlane</option>
+                        <option value="Support">Support</option>
+                    </select>
+                </th>
             </tr>
             </thead>
 

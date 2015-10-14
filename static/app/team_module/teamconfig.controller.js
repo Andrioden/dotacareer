@@ -26,7 +26,8 @@ app.controller('TeamConfigDialogController', function ($rootScope, $scope, $moda
         $scope.isDoingConfigAction = true;
         $http.post('/api/teams/updateConfig', {
             ranked_start_hour: $scope.rankedTime.start_hour + getTimezoneOffsetHours(),
-            ranked_end_hour: $scope.rankedTime.end_hour + getTimezoneOffsetHours()
+            ranked_end_hour: $scope.rankedTime.end_hour + getTimezoneOffsetHours(),
+            members_role: getMembersRoleData()
         })
             .then(function(response) {
                 $scope.isDoingConfigAction = false;
@@ -57,6 +58,15 @@ app.controller('TeamConfigDialogController', function ($rootScope, $scope, $moda
             }, function(response) {
                 alertError(response);
             });
+    }
+
+    function getMembersRoleData() {
+        var memberRolesData = [];
+        for (var i=0; i<$rootScope.player.team.members.length; i++) {
+            var member = $rootScope.player.team.members[i];
+            memberRolesData.push({id: member.id, role: member.role});
+        }
+        return memberRolesData;
     }
 
 });
