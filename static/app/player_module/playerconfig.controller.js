@@ -1,7 +1,6 @@
 app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $modalInstance, $http, $timeout) {
     // IMPORTANT CONTROLLER VARIABLES
-    $scope._selectedConfigIdTempStorage = null; // Only used as the ng-model the config selector should point to, should not be used.
-    $scope.selectedConfig = null;
+    $scope.selectedConfig;
     $scope.heroes = [];
 
     // CONSTRUCTOR
@@ -26,6 +25,10 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
         $modalInstance.dismiss('cancel');
     };
 
+    $scope.getListNameOfConfig = function(config) {
+        return config.active ? config.name + " (active)" : config.name;
+    }
+
     $scope.isAddingConfig = false;
 
     $scope.addConfig = function() {
@@ -39,16 +42,6 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
                 alertError(response);
                 $scope.isAddingConfig = false;
             });
-    }
-
-    $scope.setSelectedConfigIdAsSelectedConfig = function() {
-        for(var i=0; i<$rootScope.player.configs.length; i++) {
-            if ($rootScope.player.configs[i].id == $scope._selectedConfigIdTempStorage) {
-                $scope.selectedConfig = $rootScope.player.configs[i];
-                $scope._selectedConfigIdTempStorage = null; // Just to make it 100% clear that this variable should not be used
-                return;
-            }
-        }
     }
 
     $scope.translateTrollLevelToText = function(value) {
