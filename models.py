@@ -56,8 +56,8 @@ class Player(ndb.Model):
             data.update({
                 'matches': matches_data,
                 'configs': [config.get_data() for config in PlayerConfig.query(PlayerConfig.player == self.key)],
-                'hero_stats': [hero_stats.get_data() for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == self.key)],
                 'stats': self.get_stats_data(),
+                'hero_stats': [hero_stats.get_data() for hero_stats in PlayerHeroStats.query(PlayerHeroStats.player == self.key)],
                 'equipment': [equipment.get_data() for equipment in OwnedEquipment.query(OwnedEquipment.player == self.key)],
             })
 
@@ -108,8 +108,9 @@ class PlayerHeroStats(ndb.Model):
 
     def get_data(self):
         return {
+            'id': self.key.id(),
             'hero': self.hero,
-            'stats': self.get_stats_data(),
+            'stats': self.get_stats_data()
         }
 
     def get_stats_data(self):
@@ -376,7 +377,8 @@ class Match(polymodel.PolyModel):
         new_stat_value = current_stat_value + outcome
         setattr(player_hero_stats, stat, new_stat_value)
 
-        player_hero_stats.put()
+        player_hero_stats = player_hero_stats.put().get()
+        websocket_notify_player("Player_HeroStatsChanged", player.key, "player.hero_stats.[%s]" % player_hero_stats.key.id(), player_hero_stats.get_data())
 
     @staticmethod
     def _pop_prioritized_hero(player, hero_name_pool):

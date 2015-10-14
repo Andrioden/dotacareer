@@ -73,6 +73,7 @@ class FinishMatchesHandler(webapp2.RequestHandler):
                 player.doing = None
                 player.put()
                 websocket_notify_player("Match_Finished", player.key, None, match.get_data("full"))
+                websocket_notify_player("Player_StatsChanged", player.key, "player", {'stats': player.get_stats_data()})
 
 
 app = webapp2.WSGIApplication([

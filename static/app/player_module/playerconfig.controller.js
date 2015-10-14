@@ -11,6 +11,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
         $scope.$broadcast('rzSliderForceRender');
     });
 
+    // Keep in mind this http request will run every time the player config is opened. Just that when cache is true, it will get it from the cache, but .then will still run.
     $http.get('/api/heroes/rest/', {cache: true}).
         then(function(response) {
             $scope.heroes = response.data;
@@ -18,6 +19,7 @@ app.controller('PlayerConfigDialogController', function ($rootScope, $scope, $mo
         }, function(response) {
             alertError(response);
         });
+
 
     // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
     $scope.cancel = function () {

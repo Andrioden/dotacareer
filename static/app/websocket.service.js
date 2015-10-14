@@ -12,8 +12,11 @@ app.factory('WebSocketService', function($rootScope){
         }
 
         socket.onmessage = function(message){
-            console.log("WebSocket channel message:" + message.data);
+            console.log("WebSocket channel message: " + message.data);
             var jsonData = JSON.parse(message.data);
+            console.log("WebSocket channel message event: " + jsonData.event);
+            console.log("WebSocket channel message object below");
+            console.log(jsonData.object);
 
             // Notify Subscribers
             for (var i = 0; i < subscribers.length; i++) {
