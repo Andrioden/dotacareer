@@ -20,3 +20,7 @@ cron:
 - description: Finish matches that players have been betting on
   url: /cron/finish_matches
   schedule: every 5 mins
+
+- description: TEMP - Create tournament
+  url: /cron/create_tournament
+  schedule: every 50 hours

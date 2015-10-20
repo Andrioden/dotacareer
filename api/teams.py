@@ -45,7 +45,7 @@ class FullMembersDataHandler(webapp2.RequestHandler):
 
 class TeamsHandler(webapp2.RequestHandler):
     def get(self):
-        set_json_response(self.response, [team.get_data() for team in Team.query().fetch()])
+        set_json_response(self.response, [team.get_data() for team in Team.query()])
 
 
 class SendApplicationHandler(webapp2.RequestHandler):
@@ -82,7 +82,7 @@ class AcceptApplicationHandler(webapp2.RequestHandler):
         team = application.team.get()
 
         # VALIDATIONS
-        if not _validate_is_team_owner(self.response, team_owner, team):
+        if not validate_is_team_owner(self.response, team_owner, team):
             return
 
         # DO SHIT
@@ -110,7 +110,7 @@ class DeclineApplicationHandler(webapp2.RequestHandler):
         team = application.team.get()
 
         # VALIDATIONS
-        if not _validate_is_team_owner(self.response, player, team):
+        if not validate_is_team_owner(self.response, player, team):
             return
 
         # DO SHIT
@@ -129,7 +129,7 @@ class KickMemberHandler(webapp2.RequestHandler):
         team = kicked_player.team.get()
 
         # VALIDATIONS
-        if not _validate_is_team_owner(self.response, player, team):
+        if not validate_is_team_owner(self.response, player, team):
             return
         if player == kicked_player:
             error_400(self.response, "ERROR_CANT_KICK_SELF", "You cannot kick yourself from your own team. Are you retarded?")
@@ -177,7 +177,7 @@ class UpdateConfigHandler(webapp2.RequestHandler):
         # VALIDATIONS
         if not validate_request_data(self.response, request_data, ['ranked_start_hour', 'ranked_end_hour', 'members_role']):
             return
-        if not _validate_is_team_owner(self.response, player, team):
+        if not validate_is_team_owner(self.response, player, team):
             return
 
         # DO SHIT
@@ -196,14 +196,6 @@ class UpdateConfigHandler(webapp2.RequestHandler):
 def _validate_has_no_team(response, player):
     if player.team:
         error_400(response, "ERROR_HAS_TEAM", "Your player can only be part of 1 team.")
-        return False
-    else:
-        return True
-
-
-def _validate_is_team_owner(response, player, team):
-    if not team.owner == player.key:
-        error_400(response, "ERROR_NOT_OWNER", "Not the team owner.")
         return False
     else:
         return True

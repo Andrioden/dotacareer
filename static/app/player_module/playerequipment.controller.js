@@ -11,8 +11,6 @@ app.controller('PlayerEquipmentDialogController', function($rootScope, $scope, $
             alertError(response);
         });
 
-    // LISTEN TO EVENTS // EXPOSE METHODS TO OTHER CONTROLLERS
-
     // STANDARD DIALOG AND OTHER EXPOSED FUNCTIONS
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');

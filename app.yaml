@@ -24,6 +24,9 @@ handlers:
 - url: /api/heroes/.*
   script: api.heroes.app
 
+- url: /api/tournaments/.*
+  script: api.tournaments.app
+
 - url: /api/admin/.*
   script: api.admin.app
   login: admin

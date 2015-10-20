@@ -7,7 +7,7 @@ from gameconfig import EnergyConfig, CashConfig, BettingConfig
 from metrics.heroes import get_flat_hero_name_list, hero_metrics
 from metrics.equipment import get_flat_equipment_name_list
 from simulator.factories import MatchSimulatorFactory
-from utils import websocket_notify_player
+from utils import websocket_notify_player, datetime_to_epoch
 
 
 class Player(ndb.Model):
@@ -159,10 +159,10 @@ class Team(ndb.Model):
         data = {
             'id': self.key.id(),
             'name': self.name,
-            'owner': self.owner.get().get_data_nick_and_id()
         }
         if detail_level == "full":
             data.update({
+                'owner': self.owner.get().get_data_nick_and_id(),
                 'ranked_time': {
                     'start_hour': self.ranked_start_hour,
                     'end_hour': self.ranked_end_hour,
@@ -276,7 +276,7 @@ class Match(polymodel.PolyModel):
             'winning_faction': self.winning_faction,
             'type': self.type,
             'what': self.what(),
-            'date_epoch': int((self.date - datetime.datetime(1970, 1, 1)).total_seconds()),
+            'date_epoch': datetime_to_epoch(self.date),
             'state': self.state()
         }
 
@@ -533,4 +533,20 @@ class Bet(ndb.Model):
             'value': self.value,
             'winning_faction': self.winning_faction,
             'payout': self.payout
+        }
+
+
+class Tournament(ndb.Model):
+    name = ndb.StringProperty(required=True)
+    start_date = ndb.DateTimeProperty(required=True)
+    fee = ndb.IntegerProperty(required=True)
+    participants = ndb.KeyProperty(repeated=True)
+
+    def get_data(self):
+        return {
+            'id': self.key.id(),
+            'name': self.name,
+            'fee': self.fee,
+            'start_date_epoch': datetime_to_epoch(self.start_date),
+            'participants': [participant.get_data() for participant in ndb.get_multi(self.participants)]
         }

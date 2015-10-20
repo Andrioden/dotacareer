@@ -34,6 +34,14 @@ def validate_request_data(response, request_data, list_of_dict_keys):
     return True
 
 
+def validate_is_team_owner(response, player, team):
+    if not team.owner == player.key:
+        error_400(response, "ERROR_NOT_OWNER", "Not the team owner.")
+        return False
+    else:
+        return True
+
+
 def set_json_response(response, data):
     response.headers['Content-Type'] = 'application/json'
     response.out.write(json.dumps(data))
@@ -42,6 +50,10 @@ def set_json_response(response, data):
 def current_user_player():
     user = users.get_current_user()
     return ndb.Key('Player', user.user_id()).get()  # I use 'Player' because it allows me not to import Player from models, which again avoids a looped import
+
+
+def datetime_to_epoch(datetime_obj):
+    return int((datetime_obj - datetime.datetime(1970, 1, 1)).total_seconds()),
 
 
 def websocket_notify_player(event, player_key, object_path, object):

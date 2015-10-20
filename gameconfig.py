@@ -1,10 +1,12 @@
-class EnergyConfig():
+class EnergyConfig:
     max_energy = 100
     tick_amount = 5
 
-class CashConfig():
+
+class CashConfig:
     starting_cash = 100
     tick_amount = 5
 
-class BettingConfig():
+
+class BettingConfig:
     betting_window_minutes = 0

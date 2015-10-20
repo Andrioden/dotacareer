@@ -1,0 +1,33 @@
+<script type="text/ng-template" id="tournamentsDialog.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Tournaments</h3>
+    </div>
+    <div class="modal-body">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Start date</th>
+                <th>Fee</th>
+                <th>Participants</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="tournament in tournaments | orderBy:'-start_epoch'">
+                <td>{{tournament.name}}</td>
+                <td>{{tournament.start_date_epoch * 1000 | date:'yyyy-MM-dd, HH:mm'}}</td>
+                <td>{{tournament.fee}}</td>
+                <td>{{tournament.participants.length}}</td>
+                <td>
+                    <button ng-show="!tournament.hasJoined" ng-click="joinTournament(tournament)" ng-disabled="isJoiningTournament" class="btn btn-primary btn-sm">Join</button>
+                    <span ng-show="tournament.hasJoined">Has joined</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="button" ng-click="cancel()" class="btn btn-warning">Close</button>
+    </div>
+</script>

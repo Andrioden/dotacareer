@@ -91,6 +91,14 @@ app.controller('TeamController', function ($rootScope, $scope, $http, $modal, We
         });
     }
 
+    $scope.openTournamentsDialog = function() {
+        var modalInstance = $modal.open({
+            animation: true,
+            templateUrl: 'tournamentsDialog.html',
+            controller: 'TournamentsDialogController',
+        });
+    }
+
     // INTERNAL FUNCTIONS
     function registerTeam(team_name) {
         $http.post('/api/teams/register', {team_name: team_name}).

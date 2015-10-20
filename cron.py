@@ -3,7 +3,7 @@ import datetime
 from google.appengine.ext import ndb
 
 import webapp2
-from models import Player, Team, TeamMatch, MatchSoloQueue, Match, MatchPlayer
+from models import Player, Team, TeamMatch, MatchSoloQueue, Match, MatchPlayer, Tournament
 from gameconfig import EnergyConfig, CashConfig
 from utils import is_hour_in_start_end_time_range_adjusted_for_timezone_offset_issue, websocket_notify_player
 
@@ -34,7 +34,7 @@ class SoloQueueMatchmakingHandler(webapp2.RequestHandler):
         if MatchSoloQueue.query(MatchSoloQueue.type == match_type).count() >= 2:
             match_solo_queues = [match_queue for match_queue in MatchSoloQueue.query(MatchSoloQueue.type == match_type).fetch(10)]
             players = [match_queue.player.get() for match_queue in match_solo_queues]
-            match = Match(type=match_queue.type)
+            match = Match(type=match_type)
             match.setup_soloqueue_match(players)
             ndb.delete_multi([queue.key for queue in match_solo_queues])
             for player in players:
@@ -76,10 +76,19 @@ class FinishMatchesHandler(webapp2.RequestHandler):
                 websocket_notify_player("Player_StatsChanged", player.key, "player", {'stats': player.get_stats_data()})
 
 
+class CreateTournamentHandler(webapp2.RequestHandler):
+    def get(self):
+        Tournament(
+            name="Test Tournament",
+            start_date=datetime.datetime.now(),
+            fee=100
+        ).put()
+
 app = webapp2.WSGIApplication([
     (r'/cron/energy_tick', EnergyTickHandler),
     (r'/cron/cash_tick', CashTickHandler),
     (r'/cron/solo_queue_matchmaking', SoloQueueMatchmakingHandler),
     (r'/cron/team_matchmaking', TeamMatchmakingHandler),
     (r'/cron/finish_matches', FinishMatchesHandler),
+    (r'/cron/create_tournament', CreateTournamentHandler),
 ], debug=True)
